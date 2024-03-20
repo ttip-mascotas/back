@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: history
+
+  datasource:
+    url: jdbc:postgresql://0.0.0.0:5432/pets_history
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    user:
+      name: ala
+      password: ala
+
+server:
+  address: 0.0.0.0
+  error:
+    include-message: always
+    include-binding-errors: always
+
+springdoc:
+  api-docs:
+    version: OPENAPI_3_1
+  swagger-ui:
+    display-request-duration: true
+    groups-order: DESC
+    operationsSorter: method
+    use-root-path: true

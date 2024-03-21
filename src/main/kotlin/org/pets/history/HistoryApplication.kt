@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class HistoryApplication
 
 fun main(args: Array<String>) {
-	runApplication<HistoryApplication>(*args)
+    runApplication<HistoryApplication>(*args)
 }

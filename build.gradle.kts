@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "org.pets"
-version = "0.0.1-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
@@ -32,12 +32,11 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-
 	runtimeOnly("org.postgresql:postgresql")
 
-	testImplementation("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	testRuntimeOnly("com.h2database:h2")
 }
 
 tasks.withType<KotlinCompile> {
@@ -48,6 +47,7 @@ tasks.withType<KotlinCompile> {
 }
 
 tasks.withType<Test> {
+	jvmArgs("-XX:+EnableDynamicAgentLoading")
 	useJUnitPlatform()
 }
 
@@ -55,19 +55,21 @@ tasks.test {
 	finalizedBy(tasks.jacocoTestReport)
 }
 
-tasks.jacocoTestReport {
-	dependsOn(tasks.test)
-}
-
 jacoco {
 	toolVersion = "0.8.11"
 }
 
 tasks.jacocoTestReport {
+	dependsOn(tasks.test)
 	classDirectories.setFrom(
 		files(classDirectories.files.map {
 			fileTree(it) {
-				exclude("**/config/**", "**/entity/**", "**/*Application*.*", "**/ServletInitializer.*")
+				exclude(
+					"**/config/**",
+					"**/entity/**",
+					"**/*Application*.*",
+					"**/ServletInitializer.*",
+				)
 			}
 		})
 	)

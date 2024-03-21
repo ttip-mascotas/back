@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+permissions:
+  contents: read
+
+jobs:
+  gradle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Execute Gradle Build
+        run: ./gradlew build
+
+      - name: Run Tests
+        run: ./gradlew test
+
+      - name: Generate Coverage Reports
+        run: ./gradlew jacocoTestReport
+
+      - name: Upload Coverage Reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          slug: ttip-mascotas/back
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true # optional (default = false)
+          flags: unittests # optional
+          verbose: true # optional (default = false)

@@ -16,9 +16,6 @@ class Pet {
     @Column(length = 80)
     var name = ""
 
-    @Column(length = 256)
-    var description = ""
-
     @Column(columnDefinition="TEXT")
     var photo = ""
 

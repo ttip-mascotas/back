@@ -5,7 +5,6 @@ import org.pets.history.domain.Pet
 class PetDTO(pet: Pet) {
     var id = pet.id
     var name = pet.name
-    var description = pet.description
     var photo = pet.photo
     var age = pet.age()
     var weight = pet.weight

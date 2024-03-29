@@ -44,9 +44,7 @@ class PetController {
             )
         ]
     )
-    fun getAllPets(): ResponseEntity<String> {
-        return ResponseEntity.ok().body("hello world")
-    }
+    fun getAllPets(): ResponseEntity<String> = ResponseEntity.ok().body("hello world")
 
     @Operation(
             summary = "Get a pet",

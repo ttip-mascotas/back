@@ -5,6 +5,7 @@ import jakarta.validation.constraints.DecimalMin
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import java.time.Period
+import kotlin.math.absoluteValue
 
 @Entity
 class Pet {
@@ -14,9 +15,6 @@ class Pet {
 
     @Column(length = 80)
     var name = ""
-
-    @Column(length = 256)
-    var description = ""
 
     @Column(columnDefinition="TEXT")
     var photo = ""
@@ -38,8 +36,8 @@ class Pet {
     @Column(nullable = false)
     var sex: PetSex? = null
 
-    fun age(): Period? = this.birthdate?.let {
-        Period.between(LocalDate.now(), it)
+    fun age(): Int? = this.birthdate?.let {
+        Period.between(LocalDate.now(), it).years.absoluteValue
     }
 }
 

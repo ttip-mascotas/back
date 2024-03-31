@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.Period
 import kotlin.math.absoluteValue
 
+
 @Entity
 class Pet {
     @Id
@@ -16,7 +17,7 @@ class Pet {
     @Column(length = 80)
     var name = ""
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     var photo = ""
 
     @Column
@@ -35,6 +36,9 @@ class Pet {
 
     @Column(nullable = false)
     var sex: PetSex? = null
+
+    @OneToMany(mappedBy = "pet", cascade = [CascadeType.MERGE])
+    val medicalRecords: List<MedicalRecord> = mutableListOf()
 
     fun age(): Int? = this.birthdate?.let {
         Period.between(LocalDate.now(), it).years.absoluteValue

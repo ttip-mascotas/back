@@ -11,7 +11,7 @@ class MedicalRecord {
     var id: Long? = null
 
     @ManyToOne(cascade = [CascadeType.MERGE])
-    @JoinColumn(name = "pet_id")
+    @JoinColumn(name = "pet_id", nullable = false)
     lateinit var pet: Pet
 
     @Column(length = 256)

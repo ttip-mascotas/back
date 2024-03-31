@@ -7,7 +7,7 @@ data class MedicalRecordDTO(
     val id: Long,
     val petId: Long,
     val address: String,
-    val datetime: LocalDateTime?,
+    val datetime: LocalDateTime,
     val specialist: String,
     val observations: String,
 ) {

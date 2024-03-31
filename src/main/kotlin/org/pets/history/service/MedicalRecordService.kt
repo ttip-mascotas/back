@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class MedicalRecordService(val medicalRecordRepository: MedicalRecordRepository, val petService: PetService) {
+class MedicalRecordService(
+    private val medicalRecordRepository: MedicalRecordRepository,
+    private val petService: PetService
+) {
 
     fun saveMedicalRecord(petId: Long, medicalRecordCreateDTO: MedicalRecordCreateDTO): MedicalRecord {
         try {

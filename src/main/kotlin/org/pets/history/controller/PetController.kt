@@ -24,6 +24,7 @@ class PetController(
     private val petService: PetService,
     private val medicalRecordService: MedicalRecordService,
 ) {
+
     @GetMapping("")
     @Operation(
         summary = "Retrieves all pets",
@@ -91,4 +92,5 @@ class PetController(
         @RequestBody medicalRecordCreateDTO: MedicalRecordCreateDTO
     ): MedicalRecordDTO =
         MedicalRecordDTO.fromMedicalRecord(medicalRecordService.saveMedicalRecord(petId, medicalRecordCreateDTO))
+
 }

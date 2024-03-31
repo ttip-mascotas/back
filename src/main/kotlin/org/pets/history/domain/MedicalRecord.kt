@@ -11,19 +11,19 @@ class MedicalRecord {
     var id: Long? = null
 
     @ManyToOne(cascade = [CascadeType.MERGE])
-    @JoinColumn(name = "pet_id", nullable = false)
+    @JoinColumn(name = "pet_id", referencedColumnName = "id", nullable = false)
     lateinit var pet: Pet
 
-    @Column(length = 256)
+    @Column(length = 256, nullable = false)
     var address = ""
 
     @Column(nullable = false)
     @DateTimeFormat
-    var datetime: LocalDateTime? = null
+    lateinit var datetime: LocalDateTime
 
-    @Column(length = 128)
+    @Column(length = 128, nullable = false)
     var specialist = ""
 
-    @Column(length = 512)
+    @Column(length = 512, nullable = false)
     var observations = ""
 }

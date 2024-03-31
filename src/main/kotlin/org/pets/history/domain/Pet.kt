@@ -14,35 +14,33 @@ class Pet {
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = null
 
-    @Column(length = 80)
+    @Column(length = 80, nullable = false)
     var name = ""
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     var photo = ""
 
-    @Column
+    @Column(nullable = false)
     @DecimalMin(value = "0.0")
     var weight: Double = 0.0
 
     @Column(nullable = false)
     @DateTimeFormat
-    var birthdate: LocalDate? = null
+    lateinit var birthdate: LocalDate
 
-    @Column(length = 128)
+    @Column(length = 128, nullable = false)
     var breed: String = ""
 
-    @Column(length = 128)
+    @Column(length = 128, nullable = false)
     var fur: String = ""
 
     @Column(nullable = false)
-    var sex: PetSex? = null
+    lateinit var sex: PetSex
 
     @OneToMany(mappedBy = "pet", cascade = [CascadeType.MERGE])
     var medicalRecords: Set<MedicalRecord> = mutableSetOf()
 
-    fun age(): Int? = this.birthdate?.let {
-        Period.between(LocalDate.now(), it).years.absoluteValue
-    }
+    fun age(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
 }
 
 enum class PetSex {

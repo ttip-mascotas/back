@@ -79,7 +79,7 @@ class PetController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PetDTO::class),
+                        schema = Schema(implementation = MedicalRecordDTO::class),
                     )
                 ]
             )

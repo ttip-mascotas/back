@@ -7,24 +7,23 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.pets.history.serializer.MedicalRecordCreateDTO
+import org.pets.history.serializer.MedicalRecordDTO
 import org.pets.history.serializer.PetDTO
+import org.pets.history.service.MedicalRecordService
 import org.pets.history.service.PetService
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "pets", description = "Endpoints for managing pets")
 @CrossOrigin(origins = ["*"])
 @RequestMapping("pets")
-class PetController {
-    @Autowired
-    private lateinit var petService: PetService
-
+class PetController(
+    private val petService: PetService,
+    private val medicalRecordService: MedicalRecordService,
+) {
     @GetMapping("")
     @Operation(
         summary = "Retrieves all pets",
@@ -47,23 +46,49 @@ class PetController {
     fun getAllPets(): ResponseEntity<String> = ResponseEntity.ok().body("hello world")
 
     @Operation(
-            summary = "Get a pet",
-            description = "Get a pet by id",
+        summary = "Get a pet",
+        description = "Get a pet by id",
     )
     @ApiResponses(
-            value = [
-                ApiResponse(
-                        responseCode = "200",
-                        description = "success",
-                        content = [
-                            Content(
-                                    mediaType = "application/json",
-                                    schema = Schema(implementation = PetDTO::class),
-                            )
-                        ]
-                )
-            ]
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "success",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = PetDTO::class),
+                    )
+                ]
+            )
+        ]
     )
     @GetMapping("/{id}")
     fun getPet(@PathVariable id: Long): PetDTO = PetDTO(petService.getPet(id))
+
+    @Operation(
+        summary = "Registers a medical record",
+        description = "Registers a medical record for a given pet id",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "success",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = PetDTO::class),
+                    )
+                ]
+            )
+        ]
+    )
+    @PostMapping("/{petId}/medical-records")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createPetMedicalRecord(
+        @PathVariable petId: Long,
+        @RequestBody medicalRecordCreateDTO: MedicalRecordCreateDTO
+    ): MedicalRecordDTO =
+        MedicalRecordDTO.fromMedicalRecord(medicalRecordService.saveMedicalRecord(petId, medicalRecordCreateDTO))
 }

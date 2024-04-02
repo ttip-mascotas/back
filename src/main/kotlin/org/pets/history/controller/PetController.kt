@@ -7,24 +7,26 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.pets.history.serializer.MedicalVisitCreateRequestDTO
+import jakarta.validation.Valid
+import org.pets.history.domain.MedicalVisit
 import org.pets.history.serializer.MedicalVisitDTO
 import org.pets.history.serializer.PetDTO
 import org.pets.history.service.MedicalVisitService
 import org.pets.history.service.PetService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "pets", description = "Endpoints for managing pets")
 @CrossOrigin(origins = ["*"])
 @RequestMapping("pets")
+@Validated
 class PetController(
     private val petService: PetService,
     private val medicalVisitService: MedicalVisitService,
 ) {
-
     @GetMapping("")
     @Operation(
         summary = "Retrieves all pets",
@@ -85,14 +87,13 @@ class PetController(
             )
         ]
     )
-    @PostMapping("/{petId}/medical-visits")
+    @PostMapping("/{petId}/medical-records")
     @ResponseStatus(HttpStatus.CREATED)
     fun createPetMedicalRecord(
         @PathVariable petId: Long,
-        @RequestBody medicalVisitCreateRequestDTO: MedicalVisitCreateRequestDTO
+        @RequestBody @Valid medicalVisitIn: MedicalVisit
     ): MedicalVisitDTO {
-        val medicalVisit = medicalVisitService.saveMedicalVisit(petId, medicalVisitCreateRequestDTO)
+        val medicalVisit = medicalVisitService.saveMedicalVisit(petId, medicalVisitIn)
         return MedicalVisitDTO.fromMedicalVisit(medicalVisit)
     }
-
 }

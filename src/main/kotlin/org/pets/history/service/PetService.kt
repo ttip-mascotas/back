@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class PetService(private val petRepository: PetRepository) {
-
     fun getPet(id: Long): Pet = petRepository.findById(id).orElseThrow {
-        NotFoundException("La mascota con identificador $id no existe")
+        NotFoundException("Pet with $id does not exist")
     }
-
 }

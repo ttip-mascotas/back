@@ -10,10 +10,7 @@ import java.time.LocalDate
 import java.util.*
 
 @Service
-class HistoryApplicationBootstrap(
-    val petRepository: PetRepository
-) : InitializingBean {
-
+class HistoryApplicationBootstrap(val petRepository: PetRepository) : InitializingBean {
     override fun afterPropertiesSet() {
         if (this.petRepository.count() > 0) {
             return
@@ -28,6 +25,8 @@ class HistoryApplicationBootstrap(
             birthdate = LocalDate.now().minusYears(i.toLong())
             sex = if (i % 2 == 0) PetSex.MALE else PetSex.FEMALE
             photo = encodeImageAsBase64(i)
+            weight = (i + 1).toDouble()
+            breed = "Breed$i"
         }
     }
 
@@ -35,5 +34,4 @@ class HistoryApplicationBootstrap(
         val image = ResourceUtils.getFile("classpath:seed/$i.jpg")
         return Base64.getEncoder().encodeToString(image.readBytes())
     }
-
 }

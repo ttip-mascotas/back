@@ -92,7 +92,7 @@ class PetController(
         @RequestBody medicalVisitCreateRequestDTO: MedicalVisitCreateRequestDTO
     ): MedicalVisitDTO {
         val medicalVisit = medicalVisitService.saveMedicalVisit(petId, medicalVisitCreateRequestDTO)
-        return MedicalVisitDTO.fromMedicalRecord(medicalVisit)
+        return MedicalVisitDTO.fromMedicalVisit(medicalVisit)
     }
 
 }

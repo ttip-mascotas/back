@@ -12,7 +12,7 @@ data class MedicalVisitDTO(
     val observations: String,
 ) {
     companion object {
-        fun fromMedicalRecord(medicalVisit: MedicalVisit): MedicalVisitDTO =
+        fun fromMedicalVisit(medicalVisit: MedicalVisit): MedicalVisitDTO =
             MedicalVisitDTO(
                 id = medicalVisit.id!!,
                 petId = medicalVisit.pet.id!!,

@@ -5,7 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDateTime
 
 @Entity
-class MedicalRecord {
+class MedicalVisit {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = null

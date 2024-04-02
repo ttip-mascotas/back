@@ -7,10 +7,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.pets.history.serializer.MedicalRecordCreateDTO
-import org.pets.history.serializer.MedicalRecordDTO
+import org.pets.history.serializer.MedicalVisitCreateRequestDTO
+import org.pets.history.serializer.MedicalVisitDTO
 import org.pets.history.serializer.PetDTO
-import org.pets.history.service.MedicalRecordService
+import org.pets.history.service.MedicalVisitService
 import org.pets.history.service.PetService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("pets")
 class PetController(
     private val petService: PetService,
-    private val medicalRecordService: MedicalRecordService,
+    private val medicalVisitService: MedicalVisitService,
 ) {
 
     @GetMapping("")
@@ -65,7 +65,7 @@ class PetController(
         ]
     )
     @GetMapping("/{id}")
-    fun getPet(@PathVariable id: Long): PetDTO = PetDTO(petService.getPet(id))
+    fun getPet(@PathVariable id: Long): PetDTO = PetDTO.fromPet(petService.getPet(id))
 
     @Operation(
         summary = "Registers a medical record",
@@ -79,18 +79,20 @@ class PetController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = MedicalRecordDTO::class),
+                        schema = Schema(implementation = MedicalVisitDTO::class),
                     )
                 ]
             )
         ]
     )
-    @PostMapping("/{petId}/medical-records")
+    @PostMapping("/{petId}/medical-visits")
     @ResponseStatus(HttpStatus.CREATED)
     fun createPetMedicalRecord(
         @PathVariable petId: Long,
-        @RequestBody medicalRecordCreateDTO: MedicalRecordCreateDTO
-    ): MedicalRecordDTO =
-        MedicalRecordDTO.fromMedicalRecord(medicalRecordService.saveMedicalRecord(petId, medicalRecordCreateDTO))
+        @RequestBody medicalVisitCreateRequestDTO: MedicalVisitCreateRequestDTO
+    ): MedicalVisitDTO {
+        val medicalVisit = medicalVisitService.saveMedicalVisit(petId, medicalVisitCreateRequestDTO)
+        return MedicalVisitDTO.fromMedicalRecord(medicalVisit)
+    }
 
 }

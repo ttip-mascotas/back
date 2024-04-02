@@ -38,7 +38,7 @@ class Pet {
     lateinit var sex: PetSex
 
     @OneToMany(mappedBy = "pet", cascade = [CascadeType.MERGE])
-    var medicalRecords: Set<MedicalRecord> = mutableSetOf()
+    var medicalVisits: Set<MedicalVisit> = mutableSetOf()
 
     fun age(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
 }

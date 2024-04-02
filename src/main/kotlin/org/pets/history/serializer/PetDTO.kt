@@ -1,15 +1,31 @@
 package org.pets.history.serializer
 
 import org.pets.history.domain.Pet
+import java.time.LocalDate
 
-class PetDTO(pet: Pet) {
-    var id = pet.id
-    var name = pet.name
-    var photo = pet.photo
-    var age = pet.age()
-    var weight = pet.weight
-    var birthdate = pet.birthdate
-    var breed = pet.breed
-    var fur = pet.fur
-    var sex = pet.sex
+data class PetDTO(
+    val id: Long,
+    val name: String,
+    val photo: String,
+    val age: Int,
+    val weight: Double,
+    val birthdate: LocalDate,
+    val breed: String,
+    val fur: String,
+    val sex: String,
+) {
+    companion object {
+        fun fromPet(pet: Pet): PetDTO =
+            PetDTO(
+                id = pet.id!!,
+                name = pet.name,
+                photo = pet.photo,
+                age = pet.age(),
+                weight = pet.weight,
+                birthdate = pet.birthdate,
+                breed = pet.breed,
+                fur = pet.fur,
+                sex = pet.sex.toString(),
+            )
+    }
 }

@@ -1,5 +1,9 @@
 package org.pets.history.domain
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIdentityReference
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Past
@@ -12,24 +16,27 @@ class MedicalVisit {
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = null
 
-    @ManyToOne(cascade = [CascadeType.MERGE])
+    @ManyToOne(cascade = [CascadeType.MERGE], optional = false)
     @JoinColumn(name = "pet_id", referencedColumnName = "id", nullable = false)
-    lateinit var pet: Pet
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    @JsonProperty("petId")
+    var pet: Pet? = null
 
-    @NotEmpty(message = "Address must not be empty")
     @Column(length = 256, nullable = false)
+    @NotEmpty(message = "Address must not be empty")
     var address = ""
 
-    @Past
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Past
     lateinit var datetime: LocalDateTime
 
-    @NotEmpty(message = "Specialist must not be empty")
     @Column(length = 128, nullable = false)
+    @NotEmpty(message = "Specialist must not be empty")
     var specialist = ""
 
-    @NotEmpty(message = "Observations must not be empty")
     @Column(length = 512, nullable = false)
+    @NotEmpty(message = "Observations must not be empty")
     var observations = ""
 }

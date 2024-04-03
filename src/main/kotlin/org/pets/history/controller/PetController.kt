@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
+import org.pets.history.serializer.CollectionDTO
 import org.pets.history.service.PetService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -89,4 +90,26 @@ class PetController(private val petService: PetService) {
         @PathVariable petId: Long,
         @RequestBody @Valid medicalVisitIn: MedicalVisit
     ): MedicalVisit = petService.registerMedicalVisit(petId, medicalVisitIn)
+
+    @GetMapping("/{petId}/medical-records")
+    @Operation(
+        summary = "Retrieves all pets",
+        description = "Retrieves all registered pets",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = CollectionDTO::class),
+                    )
+                ]
+            )
+        ]
+    )
+    fun getMedicalVisitsForPetId(@PathVariable petId: Long): CollectionDTO<MedicalVisit> =
+        CollectionDTO(petService.getMedicalVisits(petId))
 }

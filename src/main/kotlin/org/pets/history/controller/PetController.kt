@@ -9,11 +9,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.pets.history.domain.MedicalVisit
-import org.pets.history.serializer.MedicalVisitDTO
-import org.pets.history.serializer.PetDTO
+import org.pets.history.domain.Pet
 import org.pets.history.service.MedicalVisitService
 import org.pets.history.service.PetService
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @Tag(name = "pets", description = "Endpoints for managing pets")
 @CrossOrigin(origins = ["*"])
-@RequestMapping("pets")
+@RequestMapping("pets", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Validated
 class PetController(
     private val petService: PetService,
@@ -60,14 +60,14 @@ class PetController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = PetDTO::class),
+                        schema = Schema(implementation = Pet::class),
                     )
                 ]
             )
         ]
     )
     @GetMapping("/{id}")
-    fun getPet(@PathVariable id: Long): PetDTO = PetDTO.fromPet(petService.getPet(id))
+    fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
 
     @Operation(
         summary = "Registers a medical record",
@@ -81,7 +81,7 @@ class PetController(
                 content = [
                     Content(
                         mediaType = "application/json",
-                        schema = Schema(implementation = MedicalVisitDTO::class),
+                        schema = Schema(implementation = MedicalVisit::class),
                     )
                 ]
             )
@@ -92,8 +92,5 @@ class PetController(
     fun createPetMedicalRecord(
         @PathVariable petId: Long,
         @RequestBody @Valid medicalVisitIn: MedicalVisit
-    ): MedicalVisitDTO {
-        val medicalVisit = medicalVisitService.saveMedicalVisit(petId, medicalVisitIn)
-        return MedicalVisitDTO.fromMedicalVisit(medicalVisit)
-    }
+    ): MedicalVisit = medicalVisitService.saveMedicalVisit(petId, medicalVisitIn)
 }

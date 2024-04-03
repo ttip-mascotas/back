@@ -1,5 +1,6 @@
 package org.pets.history.domain
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotEmpty
@@ -11,30 +12,37 @@ import kotlin.math.absoluteValue
 
 
 @Entity
+@NamedEntityGraphs(
+    NamedEntityGraph(
+        name = "joinWithMedicalVisits", attributeNodes = [
+            NamedAttributeNode("medicalVisits")
+        ]
+    )
+)
 class Pet {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = null
 
-    @NotEmpty(message = "Name must not be empty")
     @Column(length = 128, nullable = false)
+    @NotEmpty(message = "Name must not be empty")
     var name = ""
 
-    @NotEmpty(message = "Photo must not be empty")
     @Column(columnDefinition = "TEXT", nullable = false)
+    @NotEmpty(message = "Photo must not be empty")
     var photo = ""
 
     @Column(nullable = false)
     @DecimalMin(value = "0.1", message = "Weight must not be less than 0.1 Kg")
     var weight: Double = 0.0
 
-    @Past
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    lateinit var birthdate: LocalDate
+    @Past()
+    var birthdate: LocalDate = LocalDate.MIN
 
-    @NotEmpty(message = "Breed must not be empty")
     @Column(length = 128, nullable = false)
+    @NotEmpty(message = "Breed must not be empty")
     var breed: String = ""
 
     @Column(length = 128, nullable = false)
@@ -42,12 +50,14 @@ class Pet {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    lateinit var sex: PetSex
+    var sex: PetSex = PetSex.FEMALE
 
     @OneToMany(mappedBy = "pet", cascade = [CascadeType.MERGE])
     var medicalVisits: Set<MedicalVisit> = mutableSetOf()
 
-    fun age(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
+    val age
+        @JsonProperty
+        get(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
 }
 
 enum class PetSex {

@@ -4,12 +4,14 @@ import org.pets.history.domain.Pet
 import org.pets.history.domain.PetSex
 import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.util.ResourceUtils
 import java.time.LocalDate
 import java.util.*
 
 @Service
+@Profile("!test")
 class HistoryApplicationBootstrap(val petRepository: PetRepository) : InitializingBean {
     override fun afterPropertiesSet() {
         if (this.petRepository.count() > 0) {

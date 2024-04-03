@@ -22,7 +22,7 @@ class HistoryApplicationBootstrap(val petRepository: PetRepository) : Initializi
     private fun createPet(i: Int): Pet {
         return Pet().apply {
             name = "Pet$i"
-            birthdate = LocalDate.now().minusYears(i.toLong())
+            birthdate = LocalDate.of(2024, 1, 1).minusYears(i.toLong())
             sex = if (i % 2 == 0) PetSex.MALE else PetSex.FEMALE
             photo = encodeImageAsBase64(i)
             weight = (i + 1).toDouble()

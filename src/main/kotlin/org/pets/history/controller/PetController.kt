@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
-import org.pets.history.service.MedicalVisitService
 import org.pets.history.service.PetService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -21,12 +20,9 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @Tag(name = "pets", description = "Endpoints for managing pets")
 @CrossOrigin(origins = ["*"])
-@RequestMapping("pets", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+@RequestMapping("pets")
 @Validated
-class PetController(
-    private val petService: PetService,
-    private val medicalVisitService: MedicalVisitService,
-) {
+class PetController(private val petService: PetService) {
     @GetMapping("")
     @Operation(
         summary = "Retrieves all pets",
@@ -36,10 +32,10 @@ class PetController(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "success",
+                description = "Success",
                 content = [
                     Content(
-                        mediaType = "application/json",
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
                         schema = Schema(implementation = ResponseEntity::class),
                     )
                 ]
@@ -56,10 +52,10 @@ class PetController(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "success",
+                description = "Success",
                 content = [
                     Content(
-                        mediaType = "application/json",
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
                         schema = Schema(implementation = Pet::class),
                     )
                 ]
@@ -77,10 +73,10 @@ class PetController(
         value = [
             ApiResponse(
                 responseCode = "201",
-                description = "success",
+                description = "Success",
                 content = [
                     Content(
-                        mediaType = "application/json",
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
                         schema = Schema(implementation = MedicalVisit::class),
                     )
                 ]
@@ -92,5 +88,5 @@ class PetController(
     fun createPetMedicalRecord(
         @PathVariable petId: Long,
         @RequestBody @Valid medicalVisitIn: MedicalVisit
-    ): MedicalVisit = medicalVisitService.saveMedicalVisit(petId, medicalVisitIn)
+    ): MedicalVisit = petService.registerMedicalVisit(petId, medicalVisitIn)
 }

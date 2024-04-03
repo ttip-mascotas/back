@@ -16,8 +16,7 @@ class MedicalVisit {
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = null
 
-    @ManyToOne(cascade = [CascadeType.MERGE], optional = false)
-    @JoinColumn(name = "pet_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], optional = false)
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     @JsonProperty("petId")

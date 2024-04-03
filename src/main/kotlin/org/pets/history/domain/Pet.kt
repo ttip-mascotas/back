@@ -52,12 +52,17 @@ class Pet {
     @Enumerated(EnumType.STRING)
     var sex: PetSex = PetSex.FEMALE
 
-    @OneToMany(mappedBy = "pet", cascade = [CascadeType.MERGE])
-    var medicalVisits: Set<MedicalVisit> = mutableSetOf()
+    @OneToMany(mappedBy = "pet", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var medicalVisits: MutableSet<MedicalVisit> = mutableSetOf()
 
     val age
         @JsonProperty
         get(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
+
+    fun addMedicalVisit(medicalVisit: MedicalVisit) {
+        medicalVisit.pet = this
+        medicalVisits.add(medicalVisit)
+    }
 }
 
 enum class PetSex {

@@ -66,7 +66,7 @@ tasks.jacocoTestReport {
             fileTree(it) {
                 exclude(
                     "**/config/**",
-                    "**/entity/**",
+                    "**/serializer/View.kt",
                     "**/*Application*.*",
                     "**/ServletInitializer.*",
                 )

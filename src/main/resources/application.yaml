@@ -23,6 +23,10 @@ spring:
       name: ala
       password: ala
 
+  jackson:
+    mapper:
+      default-view-inclusion: true
+
 server:
   address: 0.0.0.0
   error:

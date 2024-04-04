@@ -23,7 +23,7 @@ La conexión a la base de datos se configura en el archivo [`application.yaml`](
 
 ```yaml
   datasource:
-    url: jdbc:postgresql://0.0.0.0:5432/pet_history
+    url: jdbc:postgresql://0.0.0.0:5432/pets_history
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver

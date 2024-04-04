@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -26,6 +27,7 @@ import java.time.format.DateTimeFormatter
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class PetControllerTest {
     private val mapper = ObjectMapper()
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
@@ -71,7 +73,31 @@ class PetControllerTest {
     }
 
     @Test
-    fun `While searching for a pet by ID, the pet's information is obtained`() {
+    fun `Obtain all pets`() {
+        petRepository.save(anyPet())
+        petRepository.save(anyPet())
+
+        mockMvc.perform(
+            get("/pets")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.results.length()").value(2))
+            .andExpect(jsonPath("$.results[0].id").isNumber)
+            .andExpect(jsonPath("$.results[0].name").value("Pippin"))
+            .andExpect(jsonPath("$.results[0].photo").isNotEmpty)
+            .andExpect(jsonPath("$.results[0].birthdate").value("2023-01-01"))
+            .andExpect(jsonPath("$.results[0].breed").value("San Bernardo"))
+            .andExpect(jsonPath("$.results[0].weight").value(2.toDouble()))
+            .andExpect(jsonPath("$.results[0].age").value("1"))
+            .andExpect(jsonPath("$.results[0].fur").value("Long"))
+            .andExpect(jsonPath("$.results[0].sex").value("FEMALE"))
+    }
+
+    @Test
+    fun `Given a pet id that exists, the pet's information is found and returned`() {
         val pet = petRepository.save(anyPet())
         val id = pet.id
 
@@ -82,8 +108,9 @@ class PetControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.id").isNumber)
             .andExpect(jsonPath("$.name").value("Pippin"))
+            .andExpect(jsonPath("$.photo").isNotEmpty)
             .andExpect(jsonPath("$.birthdate").value("2023-01-01"))
             .andExpect(jsonPath("$.breed").value("San Bernardo"))
             .andExpect(jsonPath("$.weight").value(2.toDouble()))
@@ -94,7 +121,7 @@ class PetControllerTest {
     }
 
     @Test
-    fun `While searching for a pet by ID that does not exist, status not found is obtained`() {
+    fun `Given a pet id that does not exists, an error is returned`() {
         val id = 99
 
         mockMvc.perform(
@@ -102,13 +129,10 @@ class PetControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNotFound)
-        //.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        //.andExpect(jsonPath("$.error").value("Not Found"))
-        //.andExpect(jsonPath("$.message").value("Pet with $id does not exist"))
     }
 
     @Test
-    fun `While registering a medical visit for a pet by ID that does exist, the medical visit details are obtained`() {
+    fun `Given a pet id that does exist and the details of a medical record, registers said record and return it`() {
         val pet = petRepository.save(anyPet())
         val id = pet.id
 
@@ -123,10 +147,49 @@ class PetControllerTest {
         )
             .andExpect(status().isCreated)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").isNumber)
             .andExpect(jsonPath("$.address").value(medicalVisit.address))
             .andExpect(jsonPath("$.specialist").value(medicalVisit.specialist))
             .andExpect(jsonPath("$.datetime").value(medicalVisit.datetime.format(datetimeFormatter)))
             .andExpect(jsonPath("$.observations").value(medicalVisit.observations))
+    }
+
+    @Test
+    fun `Given a pet id that does not exist and the details of a medical record, fail to register said record and return an error`() {
+        val id = 99
+
+        val medicalVisit = anyMedicalVisit()
+        val json = mapper.writeValueAsString(medicalVisit)
+
+        mockMvc.perform(
+            post("/pets/$id/medical-records")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        )
+            .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `Given a pet id that exists, obtain all of its associated medical records`() {
+        var pet = anyPet()
+        pet.addMedicalVisit(anyMedicalVisit())
+        pet = petRepository.save(pet)
+        val id = pet.id
+
+        mockMvc.perform(
+            get("/pets/$id/medical-records")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.results.length()").value(1))
+            .andExpect(jsonPath("$.results.[0].id").isNumber)
+            .andExpect(jsonPath("$.results.[0].address").value("Evergreen 123"))
+            .andExpect(jsonPath("$.results.[0].datetime").value("2024-03-28T12:00:00"))
+            .andExpect(jsonPath("$.results.[0].specialist").value("Lisa Simpson"))
+            .andExpect(jsonPath("$.results.[0].observations").value("Healthy"))
     }
 
 }

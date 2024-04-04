@@ -31,6 +31,5 @@ class PetService(private val petRepository: PetRepository, private val medicalVi
         }
     }
 
-    fun getMedicalVisits(petId: Long): MutableIterable<MedicalVisit> =
-        medicalVisitRepository.findAllByPetIdOrderByDatetimeDesc(petId)
+    fun getMedicalVisits(petId: Long): Iterable<MedicalVisit> = getPet(petId).medicalVisits
 }

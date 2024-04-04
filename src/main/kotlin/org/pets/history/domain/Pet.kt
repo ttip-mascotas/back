@@ -40,7 +40,7 @@ class Pet {
 
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    @Past()
+    @Past
     var birthdate: LocalDate = LocalDate.MIN
 
     @Column(length = 128, nullable = false)
@@ -54,7 +54,9 @@ class Pet {
     @Enumerated(EnumType.STRING)
     var sex: PetSex = PetSex.FEMALE
 
-    @OneToMany(mappedBy = "pet", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinColumn
+    @OrderBy(value = "datetime DESC")
     @JsonView(View.Extended::class)
     var medicalVisits: MutableSet<MedicalVisit> = mutableSetOf()
 
@@ -63,7 +65,6 @@ class Pet {
         get(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
 
     fun addMedicalVisit(medicalVisit: MedicalVisit) {
-        medicalVisit.pet = this
         medicalVisits.add(medicalVisit)
     }
 }

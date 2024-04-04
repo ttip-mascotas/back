@@ -17,7 +17,7 @@ class MedicalVisit {
 
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    //TODO: ver porqué la anotación no funciona con la componente de tiempo y/o si hay alternativas
+    //TODO: encontrar una alternativa porque no contempla la componente de tiempo
     //@PastOrPresent(message = "Es necesario que introduzcas una fecha y hora igual o anterior a ahora")
     var datetime: LocalDateTime = LocalDateTime.MIN
 

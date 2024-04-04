@@ -5,14 +5,15 @@ import org.pets.history.domain.PetSex
 import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
+import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
-import org.springframework.util.ResourceUtils
 import java.time.LocalDate
 import java.util.*
 
 @Service
 @Profile("!test")
-class HistoryApplicationBootstrap(val petRepository: PetRepository) : InitializingBean {
+class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRepository: PetRepository) :
+    InitializingBean {
     override fun afterPropertiesSet() {
         if (this.petRepository.count() > 0) {
             return
@@ -33,7 +34,8 @@ class HistoryApplicationBootstrap(val petRepository: PetRepository) : Initializi
     }
 
     private fun encodeImageAsBase64(i: Int): String {
-        val image = ResourceUtils.getFile("classpath:seed/$i.jpg")
+        val resource = resourceLoader.getResource("classpath:seed/$i.jpg")
+        val image = resource.inputStream
         return Base64.getEncoder().encodeToString(image.readBytes())
     }
 }

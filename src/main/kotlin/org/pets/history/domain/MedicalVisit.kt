@@ -23,7 +23,7 @@ class MedicalVisit {
     var pet: Pet? = null
 
     @Column(length = 256, nullable = false)
-    @NotEmpty(message = "Es necesario que cargues la dirección")
+    @NotEmpty(message = "Es necesario que introduzcas la dirección")
     var address = ""
 
     @Column(nullable = false)
@@ -32,10 +32,10 @@ class MedicalVisit {
     lateinit var datetime: LocalDateTime
 
     @Column(length = 128, nullable = false)
-    @NotEmpty(message = "Es necesario que cargues el/la especialista")
+    @NotEmpty(message = "Es necesario que introduzcas el nombre del especialista")
     var specialist = ""
 
     @Column(length = 512, nullable = false)
-    @NotEmpty(message = "Es necesario que cargues las observaciones")
+    @NotEmpty(message = "Es necesario que introduzcas las observaciones")
     var observations = ""
 }

@@ -27,15 +27,15 @@ class Pet {
     var id: Long? = null
 
     @Column(length = 128, nullable = false)
-    @NotEmpty(message = "Name must not be empty")
+    @NotEmpty(message = "Es necesario que introduzcas un nombre")
     var name = ""
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    @NotEmpty(message = "Photo must not be empty")
+    @NotEmpty(message = "Es necesario que cargues una foto")
     var photo = ""
 
     @Column(nullable = false)
-    @DecimalMin(value = "0.1", message = "Weight must not be less than 0.1 Kg")
+    @DecimalMin(value = "0.1", message = "Es necesario que peso sea mayor o igual a 0.1 Kg")
     var weight: Double = 0.0
 
     @Column(nullable = false)
@@ -44,7 +44,7 @@ class Pet {
     var birthdate: LocalDate = LocalDate.MIN
 
     @Column(length = 128, nullable = false)
-    @NotEmpty(message = "Breed must not be empty")
+    @NotEmpty(message = "Es necesario que cargues una raza")
     var breed: String = ""
 
     @Column(length = 128, nullable = false)

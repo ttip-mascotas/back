@@ -15,22 +15,58 @@ import java.util.*
 class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRepository: PetRepository) :
     InitializingBean {
     override fun afterPropertiesSet() {
-        if (this.petRepository.count() > 0) {
+        if (petRepository.count() > 0) {
             return
         }
-        val pets = (1..5).map { i -> createPet(i) }
-        this.petRepository.saveAll(pets)
-    }
 
-    private fun createPet(i: Int): Pet {
-        return Pet().apply {
-            name = "Pet$i"
-            birthdate = LocalDate.of(2024, 1, 1).minusYears(i.toLong())
-            sex = if (i % 2 == 0) PetSex.MALE else PetSex.FEMALE
-            photo = encodeImageAsBase64(i)
-            weight = (i + 1).toDouble()
-            breed = "Breed$i"
-        }
+        val petSeeds = listOf(
+            Pet().apply {
+                name = "Jake"
+                photo = encodeImageAsBase64(0)
+                weight = 5.5
+                birthdate = LocalDate.of(2023, 1, 1)
+                breed = "Shiba Inu"
+                fur = "Corto"
+                sex = PetSex.MALE
+            },
+            Pet().apply {
+                name = "Fiona"
+                photo = encodeImageAsBase64(1)
+                weight = 5.5
+                birthdate = LocalDate.of(2023, 1, 1)
+                breed = "Singapura"
+                fur = "Corto"
+                sex = PetSex.FEMALE
+            },
+            Pet().apply {
+                name = "Braulio"
+                photo = encodeImageAsBase64(2)
+                weight = 0.25
+                birthdate = LocalDate.of(2023, 1, 1)
+                breed = "Hámster Sirio"
+                fur = "Corto"
+                sex = PetSex.MALE
+            },
+            Pet().apply {
+                name = "Verdún"
+                photo = encodeImageAsBase64(3)
+                weight = 0.15
+                birthdate = LocalDate.of(2023, 1, 1)
+                breed = "Gecko Leopardo"
+                fur = "Escamas verdes con puntos rojos"
+                sex = PetSex.MALE
+            },
+            Pet().apply {
+                name = "Naranjita"
+                photo = encodeImageAsBase64(4)
+                weight = 1.8
+                birthdate = LocalDate.of(2023, 1, 1)
+                breed = "Gallina Rhode Island Red"
+                fur = "Plumas anaranjas"
+                sex = PetSex.FEMALE
+            },
+        )
+        petRepository.saveAll(petSeeds)
     }
 
     private fun encodeImageAsBase64(i: Int): String {

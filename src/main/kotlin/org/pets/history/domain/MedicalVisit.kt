@@ -2,7 +2,6 @@ package org.pets.history.domain
 
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
-import jakarta.validation.constraints.Past
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDateTime
 
@@ -18,8 +17,9 @@ class MedicalVisit {
 
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Past
-    lateinit var datetime: LocalDateTime
+    //TODO: ver porqué la anotación no funciona con la componente de tiempo y/o si hay alternativas
+    //@PastOrPresent(message = "Es necesario que introduzcas una fecha y hora igual o anterior a ahora")
+    var datetime: LocalDateTime = LocalDateTime.MIN
 
     @Column(length = 128, nullable = false)
     @NotEmpty(message = "Es necesario que introduzcas el nombre del especialista")

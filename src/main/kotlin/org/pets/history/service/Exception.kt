@@ -5,3 +5,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class NotFoundException(override val message: String) : RuntimeException(message)
+
+@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+class UnexpectedException : RuntimeException("Unexpected error occurred while registering a medical visit")

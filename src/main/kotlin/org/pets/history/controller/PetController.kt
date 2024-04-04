@@ -1,6 +1,7 @@
 package org.pets.history.controller
 
 
+import com.fasterxml.jackson.annotation.JsonView
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -11,10 +12,10 @@ import jakarta.validation.Valid
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.serializer.CollectionDTO
+import org.pets.history.serializer.View
 import org.pets.history.service.PetService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -37,13 +38,14 @@ class PetController(private val petService: PetService) {
                 content = [
                     Content(
                         mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = Schema(implementation = ResponseEntity::class),
+                        schema = Schema(implementation = CollectionDTO::class),
                     )
                 ]
             )
         ]
     )
-    fun getAllPets(): ResponseEntity<String> = ResponseEntity.ok().body("hello world")
+    @JsonView(View.Compact::class)
+    fun getAllPets(): CollectionDTO<Pet> = CollectionDTO(petService.getAllPets())
 
     @Operation(
         summary = "Get a pet",
@@ -64,6 +66,7 @@ class PetController(private val petService: PetService) {
         ]
     )
     @GetMapping("/{id}")
+    @JsonView(View.Extended::class)
     fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
 
     @Operation(

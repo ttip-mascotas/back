@@ -1,10 +1,12 @@
 package org.pets.history.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonView
 import jakarta.persistence.*
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Past
+import org.pets.history.serializer.View
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import java.time.Period
@@ -53,6 +55,7 @@ class Pet {
     var sex: PetSex = PetSex.FEMALE
 
     @OneToMany(mappedBy = "pet", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JsonView(View.Extended::class)
     var medicalVisits: MutableSet<MedicalVisit> = mutableSetOf()
 
     val age

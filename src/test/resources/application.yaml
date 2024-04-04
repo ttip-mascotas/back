@@ -23,3 +23,7 @@ spring:
           auto: create-drop
         connection:
           pool_size: 50
+
+  jackson:
+    mapper:
+      default-view-inclusion: true

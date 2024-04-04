@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Transactional(Transactional.TxType.SUPPORTS)
 class PetService(private val petRepository: PetRepository, private val medicalVisitRepository: MedicalVisitRepository) {
     fun getPet(id: Long): Pet = petRepository.findWithMedicalVisitsById(id).orElseThrow {
-        NotFoundException("Pet with $id does not exist")
+        NotFoundException("No existe la mascota con identificador $id")
     }
 
     fun getAllPets(): MutableIterable<Pet> = petRepository.findAll()

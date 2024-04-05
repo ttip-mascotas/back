@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView
 import jakarta.persistence.*
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotEmpty
-import jakarta.validation.constraints.Past
+import jakarta.validation.constraints.PastOrPresent
 import org.pets.history.serializer.View
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
@@ -31,20 +31,20 @@ class Pet {
     var name = ""
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    @NotEmpty(message = "Es necesario que cargues una foto")
+    @NotEmpty(message = "Es necesario que introduzcas una foto")
     var photo = ""
 
     @Column(nullable = false)
-    @DecimalMin(value = "0.1", message = "Es necesario que peso sea mayor o igual a 0.1 Kg")
+    @DecimalMin(value = "0.1", message = "Es necesario que introduzcas un peso mayor o igual a 0.1 Kg")
     var weight: Double = 0.0
 
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    @Past()
+    @PastOrPresent(message = "Es necesario que introduzcas una fecha de nacimiento igual o anterior a hoy")
     var birthdate: LocalDate = LocalDate.MIN
 
     @Column(length = 128, nullable = false)
-    @NotEmpty(message = "Es necesario que cargues una raza")
+    @NotEmpty(message = "Es necesario que introduzcas una raza")
     var breed: String = ""
 
     @Column(length = 128, nullable = false)
@@ -54,7 +54,9 @@ class Pet {
     @Enumerated(EnumType.STRING)
     var sex: PetSex = PetSex.FEMALE
 
-    @OneToMany(mappedBy = "pet", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinColumn(name = "pet_id")
+    @OrderBy(value = "datetime DESC")
     @JsonView(View.Extended::class)
     var medicalVisits: MutableSet<MedicalVisit> = mutableSetOf()
 
@@ -63,7 +65,6 @@ class Pet {
         get(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
 
     fun addMedicalVisit(medicalVisit: MedicalVisit) {
-        medicalVisit.pet = this
         medicalVisits.add(medicalVisit)
     }
 }

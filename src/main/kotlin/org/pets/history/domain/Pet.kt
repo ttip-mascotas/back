@@ -55,7 +55,7 @@ class Pet {
     var sex: PetSex = PetSex.FEMALE
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JoinColumn
+    @JoinColumn(name = "pet_id")
     @OrderBy(value = "datetime DESC")
     @JsonView(View.Extended::class)
     var medicalVisits: MutableSet<MedicalVisit> = mutableSetOf()

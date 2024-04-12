@@ -11,11 +11,20 @@ import org.springframework.stereotype.Service
 @Service
 @Transactional(Transactional.TxType.SUPPORTS)
 class PetService(private val petRepository: PetRepository, private val medicalVisitRepository: MedicalVisitRepository) {
+    fun getAllPets(): MutableIterable<Pet> = petRepository.findAll()
+
     fun getPet(id: Long): Pet = petRepository.findWithMedicalVisitsById(id).orElseThrow {
         NotFoundException("No existe la mascota con identificador $id")
     }
 
-    fun getAllPets(): MutableIterable<Pet> = petRepository.findAll()
+    @Transactional(Transactional.TxType.REQUIRED)
+    fun registerPet(@Valid pet: Pet): Pet {
+        try {
+            return petRepository.save(pet)
+        } catch (e: Exception) {
+            throw UnexpectedException()
+        }
+    }
 
     @Transactional(Transactional.TxType.REQUIRED)
     fun registerMedicalVisit(petId: Long, @Valid medicalVisit: MedicalVisit): MedicalVisit {

@@ -25,28 +25,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("pets")
 @Validated
 class PetController(private val petService: PetService) {
-    @GetMapping("")
-    @Operation(
-        summary = "Retrieves all pets",
-        description = "Retrieves all registered pets",
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Success",
-                content = [
-                    Content(
-                        mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = Schema(implementation = CollectionDTO::class),
-                    )
-                ]
-            )
-        ]
-    )
-    @JsonView(View.Compact::class)
-    fun getAllPets(): CollectionDTO<Pet> = CollectionDTO(petService.getAllPets())
-
     @Operation(
         summary = "Get a pet",
         description = "Get a pet by id",
@@ -89,12 +67,12 @@ class PetController(private val petService: PetService) {
     )
     @PostMapping("/{petId}/medical-records")
     @ResponseStatus(HttpStatus.CREATED)
-    fun createPetMedicalRecord(
+    fun registerPetMedicalVisit(
         @PathVariable petId: Long,
         @RequestBody @Valid medicalVisitIn: MedicalVisit
     ): MedicalVisit = petService.registerMedicalVisit(petId, medicalVisitIn)
 
-    @GetMapping("/{petId}/medical-records")
+    @GetMapping("")
     @Operation(
         summary = "Retrieves all pets",
         description = "Retrieves all registered pets",
@@ -113,6 +91,51 @@ class PetController(private val petService: PetService) {
             )
         ]
     )
+    @JsonView(View.Compact::class)
+    fun getAllPets(): CollectionDTO<Pet> = CollectionDTO(petService.getAllPets())
+
+    @GetMapping("/{petId}/medical-records")
+    @Operation(
+        summary = "Retrieves medical visits",
+        description = "Retrieves all medical visits for a given pet id",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = CollectionDTO::class),
+                    )
+                ]
+            )
+        ]
+    )
     fun getMedicalVisitsForPetId(@PathVariable petId: Long): CollectionDTO<MedicalVisit> =
         CollectionDTO(petService.getMedicalVisits(petId))
+
+    @Operation(
+        summary = "Registers a pet",
+        description = "Registers a pet",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = Pet::class),
+                    )
+                ]
+            )
+        ]
+    )
+    @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
+    @JsonView(View.Compact::class)
+    fun registerPet(@RequestBody @Valid petIn: Pet): Pet = petService.registerPet(petIn)
 }

@@ -26,6 +26,8 @@ class PetService(private val petRepository: PetRepository, private val medicalVi
         }
     }
 
+    fun getMedicalVisits(petId: Long): Iterable<MedicalVisit> = getPet(petId).medicalVisits
+
     @Transactional(Transactional.TxType.REQUIRED)
     fun registerMedicalVisit(petId: Long, @Valid medicalVisit: MedicalVisit): MedicalVisit {
         try {
@@ -39,6 +41,4 @@ class PetService(private val petRepository: PetRepository, private val medicalVi
             throw UnexpectedException()
         }
     }
-
-    fun getMedicalVisits(petId: Long): Iterable<MedicalVisit> = getPet(petId).medicalVisits
 }

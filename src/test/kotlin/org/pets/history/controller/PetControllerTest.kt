@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter
 class PetControllerTest {
     private val mapper = ObjectMapper()
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     private lateinit var mockMvc: MockMvc
 
     @Autowired
@@ -73,7 +74,7 @@ class PetControllerTest {
     }
 
     @Test
-    fun `Obtain all pets`() {
+    fun `Retrieve all pets`() {
         petRepository.save(anyPet())
         petRepository.save(anyPet())
 
@@ -132,7 +133,46 @@ class PetControllerTest {
     }
 
     @Test
-    fun `Given a pet id that does exist and the details of a medical record, registers said record and return it`() {
+    fun `Given the details of a pet, registers said pet and return it`() {
+        val pet = anyPet()
+        val json = mapper.writeValueAsString(pet)
+
+        mockMvc.perform(
+            post("/pets")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        )
+            .andExpect(status().isCreated)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").isNumber)
+            .andExpect(jsonPath("$.name").value(pet.name))
+            .andExpect(jsonPath("$.photo").value(pet.photo))
+            .andExpect(jsonPath("$.weight").value(pet.weight))
+            .andExpect(jsonPath("$.birthdate").value(pet.birthdate.format(dateFormatter)))
+            .andExpect(jsonPath("$.breed").value(pet.breed))
+            .andExpect(jsonPath("$.fur").value(pet.fur))
+            .andExpect(jsonPath("$.sex").value(pet.sex.toString()))
+            .andExpect(jsonPath("$.age").value(pet.age))
+    }
+
+    @Test
+    fun `Given the details of a pet, when said details contain a negative weight, fail to register the pet and return an error`() {
+        val pet = anyPet()
+        pet.weight = -1.0
+        val json = mapper.writeValueAsString(pet)
+
+        mockMvc.perform(
+            post("/pets")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `Given a pet id that does exist and the details of a medical visit, registers said record and return it`() {
         val pet = petRepository.save(anyPet())
         val id = pet.id
 
@@ -155,7 +195,7 @@ class PetControllerTest {
     }
 
     @Test
-    fun `Given a pet id that does not exist and the details of a medical record, fail to register said record and return an error`() {
+    fun `Given a pet id that does not exist and the details of a medical visit, fail to register said record and return an error`() {
         val id = 99
 
         val medicalVisit = anyMedicalVisit()
@@ -171,7 +211,7 @@ class PetControllerTest {
     }
 
     @Test
-    fun `Given a pet id that exists, obtain all of its associated medical records`() {
+    fun `Given a pet id that exists, obtain all of its associated medical visits`() {
         var pet = anyPet()
         pet.addMedicalVisit(anyMedicalVisit())
         pet = petRepository.save(pet)

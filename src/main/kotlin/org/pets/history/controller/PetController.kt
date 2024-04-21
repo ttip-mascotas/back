@@ -189,4 +189,11 @@ class PetController(
         @PathVariable petId: Long,
         @RequestPart("analysis") analysis: MultipartFile,
     ): Analysis = petService.attachAnalysis(petId, analysis)
+
+    @PostMapping("/{petId}/analysis")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun uploadAnalysis(
+            @PathVariable petId: String,
+            @Valid @NotNull @RequestParam("file")  pdfFile: MultipartFile,
+    ): String = petService.uploadAnalysis(pdfFile)
 }

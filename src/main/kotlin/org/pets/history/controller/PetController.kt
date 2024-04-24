@@ -158,7 +158,8 @@ class PetController(private val petService: PetService) {
                 )
             ]
     )
-    @PostMapping("/{petId}/treatment")
+    @PostMapping("/{petId}/treatments")
+
     @ResponseStatus(HttpStatus.CREATED)
     fun startTreatment(
             @PathVariable petId: Long,

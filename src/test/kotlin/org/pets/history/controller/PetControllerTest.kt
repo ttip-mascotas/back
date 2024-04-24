@@ -252,7 +252,8 @@ class PetControllerTest {
         val json = mapper.writeValueAsString(treatment)
 
         mockMvc.perform(
-                post("/pets/$id/treatment")
+                post("/pets/$id/treatments")
+
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)

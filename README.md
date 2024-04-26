@@ -10,27 +10,43 @@ Instalar alguna herramienta para administración de contenedores:
 
 - Docker (Linux/Windows/MacOS)
 - Podman + podman-docker + Podman Desktop (opcional)
+- GNU Make
 
 ### Contenedores
 
+Para iniciar PostgreSQL y Minio, ejecutar:
+
 ```bash
-docker-compose up
+make dev
 ```
 
-Esto ejecuta tanto PostgreSQL como el cliente pgAdmin.
+Si además se quiere ejecutar la API dentro de un contenedor:
 
-La conexión a la base de datos se configura en el archivo [`application.yaml`](./src/main/resources/application.yaml):
-
-```yaml
-  datasource:
-    url: jdbc:postgresql://0.0.0.0:5432/pets_history
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+```bash
+make up
 ```
 
-- `0.0.0.0` apunta al contenedor en el que corre la base de datos
-- el usuario y contraseña están definidos en el archivo `compose.yaml`
+El comando anterior correrá el build de la imagen necesaria para ejecutar el servicio.
+
+La configuración del entorno de los contenedores está centralizada en el archivo [`.env`](./.env):
+
+```ini
+SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pets_history
+SPRING_SERVER_PORT=8080
+
+MINIO_USERNAME=miniouser
+MINIO_PASSWORD=miniopassword
+MINIO_WEBUI_PORT=9001
+MINIO_PORT=9000
+MINIO_HOST=http://minio:${MINIO_PORT}
+MINIO_PUBLIC_BUCKET=public
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=pets_history
+```
+
+- `db` apunta al contenedor en el que corre la base de datos
 
 ### Endpoints
 

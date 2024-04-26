@@ -3,16 +3,21 @@ package org.pets.history
 import org.pets.history.domain.Pet
 import org.pets.history.domain.PetSex
 import org.pets.history.repository.PetRepository
+import org.pets.history.service.MinioService
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.ResourceLoader
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
 
 @Service
 @Profile("!test")
-class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRepository: PetRepository) :
+class HistoryApplicationBootstrap(
+    val resourceLoader: ResourceLoader,
+    val petRepository: PetRepository,
+    val minioService: MinioService,
+) :
     InitializingBean {
     override fun afterPropertiesSet() {
         if (petRepository.count() > 0) {
@@ -22,7 +27,7 @@ class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRep
         val petSeeds = listOf(
             Pet().apply {
                 name = "Jake"
-                photo = encodeImageAsBase64(0)
+                photo = getAvatarURL(0)
                 weight = 5.5
                 birthdate = LocalDate.of(2023, 1, 1)
                 breed = "Shiba Inu"
@@ -31,7 +36,7 @@ class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRep
             },
             Pet().apply {
                 name = "Fiona"
-                photo = encodeImageAsBase64(1)
+                photo = getAvatarURL(1)
                 weight = 5.5
                 birthdate = LocalDate.of(2023, 1, 1)
                 breed = "Singapura"
@@ -40,7 +45,7 @@ class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRep
             },
             Pet().apply {
                 name = "Braulio"
-                photo = encodeImageAsBase64(2)
+                photo = getAvatarURL(2)
                 weight = 0.25
                 birthdate = LocalDate.of(2023, 1, 1)
                 breed = "Hámster Sirio"
@@ -49,7 +54,7 @@ class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRep
             },
             Pet().apply {
                 name = "Verdún"
-                photo = encodeImageAsBase64(3)
+                photo = getAvatarURL(3)
                 weight = 0.15
                 birthdate = LocalDate.of(2023, 1, 1)
                 breed = "Gecko Leopardo"
@@ -58,7 +63,7 @@ class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRep
             },
             Pet().apply {
                 name = "Naranjita"
-                photo = encodeImageAsBase64(4)
+                photo = getAvatarURL(4)
                 weight = 1.8
                 birthdate = LocalDate.of(2023, 1, 1)
                 breed = "Gallina Rhode Island Red"
@@ -69,9 +74,8 @@ class HistoryApplicationBootstrap(val resourceLoader: ResourceLoader, val petRep
         petRepository.saveAll(petSeeds)
     }
 
-    private fun encodeImageAsBase64(i: Int): String {
+    private fun getAvatarURL(i: Int): String {
         val resource = resourceLoader.getResource("classpath:seed/$i.jpg")
-        val image = resource.inputStream
-        return Base64.getEncoder().encodeToString(image.readBytes())
+        return minioService.uploadFile(resource.inputStream, MediaType.IMAGE_JPEG_VALUE)
     }
 }

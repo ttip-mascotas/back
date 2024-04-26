@@ -1,3 +1,3 @@
 package org.pets.history.serializer
 
-data class Avatar(val url: String)
+data class AvatarDTO(val url: String)

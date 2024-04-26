@@ -12,7 +12,7 @@ import jakarta.validation.Valid
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
-import org.pets.history.serializer.Avatar
+import org.pets.history.serializer.AvatarDTO
 import org.pets.history.serializer.CollectionDTO
 import org.pets.history.serializer.View
 import org.pets.history.service.MinioService
@@ -98,7 +98,10 @@ class PetController(
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     @JsonView(View.Compact::class)
-    fun registerPet(@RequestBody @Valid petIn: Pet): Pet = petService.registerPet(petIn)
+    fun registerPet(@RequestBody @Valid petIn: Pet): Pet {
+        val p = petService.registerPet(petIn)
+        return p
+    }
 
     @GetMapping("/{petId}/medical-records")
     @Operation(
@@ -166,7 +169,6 @@ class PetController(
         ]
     )
     @PostMapping("/{petId}/treatments")
-
     @ResponseStatus(HttpStatus.CREATED)
     fun startTreatment(
         @PathVariable petId: Long,
@@ -176,5 +178,5 @@ class PetController(
     @PostMapping("/avatars", consumes = [MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE])
     fun uploadAvatar(
         @RequestPart("avatars") avatar: MultipartFile
-    ): Avatar = Avatar(minioService.uploadFile(avatar.inputStream, avatar.contentType!!))
+    ): AvatarDTO = AvatarDTO(minioService.uploadFile(avatar.inputStream, avatar.contentType!!))
 }

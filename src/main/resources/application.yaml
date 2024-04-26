@@ -18,11 +18,6 @@ spring:
       hibernate:
         format_sql: true
 
-  security:
-    user:
-      name: ala
-      password: ala
-
   jackson:
     mapper:
       default-view-inclusion: true
@@ -45,3 +40,10 @@ springdoc:
     groups-order: DESC
     operationsSorter: method
     use-root-path: true
+
+minio:
+  username: miniouser
+  password: miniopassword
+  host: http://127.0.0.1:9000
+  public_bucket: public
+  put_object_part_size: 10485760

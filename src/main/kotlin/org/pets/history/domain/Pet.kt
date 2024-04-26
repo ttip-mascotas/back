@@ -31,8 +31,7 @@ class Pet {
     @NotEmpty(message = "Es necesario que introduzcas un nombre")
     var name = ""
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    @NotEmpty(message = "Es necesario que introduzcas una foto")
+    @Column(length = 256, nullable = false)
     var photo = ""
 
     @Column(nullable = false)

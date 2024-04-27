@@ -12,8 +12,8 @@ import jakarta.validation.Valid
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
-import org.pets.history.serializer.AvatarDTO
 import org.pets.history.serializer.CollectionDTO
+import org.pets.history.serializer.FileDTO
 import org.pets.history.serializer.View
 import org.pets.history.service.MinioService
 import org.pets.history.service.PetService
@@ -25,10 +25,10 @@ import org.springframework.web.multipart.MultipartFile
 
 
 @RestController
+@Validated
 @Tag(name = "pets", description = "Endpoints for managing pets")
 @CrossOrigin(origins = ["*"])
 @RequestMapping("pets")
-@Validated
 class PetController(
     private val petService: PetService,
     private val minioService: MinioService
@@ -98,10 +98,7 @@ class PetController(
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     @JsonView(View.Compact::class)
-    fun registerPet(@RequestBody @Valid petIn: Pet): Pet {
-        val p = petService.registerPet(petIn)
-        return p
-    }
+    fun registerPet(@RequestBody @Valid petIn: Pet): Pet = petService.registerPet(petIn)
 
     @GetMapping("/{petId}/medical-records")
     @Operation(
@@ -175,8 +172,20 @@ class PetController(
         @RequestBody @Valid treatment: Treatment
     ): Treatment = petService.startTreatment(petId, treatment)
 
-    @PostMapping("/avatars", consumes = [MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE])
+    @PostMapping(
+        "/avatars",
+        consumes = [MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
     fun uploadAvatar(
-        @RequestPart("avatars") avatar: MultipartFile
-    ): AvatarDTO = AvatarDTO(minioService.uploadFile(avatar.inputStream, avatar.contentType!!))
+        @RequestPart("avatar") avatar: MultipartFile
+    ): FileDTO = FileDTO(minioService.uploadAvatar(avatar.inputStream, avatar.contentType!!))
+
+    @PostMapping(
+        "/{petId}/analysis",
+        consumes = [MediaType.APPLICATION_PDF_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
+    fun uploadAnalysis(
+        @PathVariable petId: Long,
+        @RequestPart("analysis") analysis: MultipartFile,
+    ): FileDTO = FileDTO(minioService.uploadPetAnalysis(petId, analysis.inputStream, analysis.contentType!!))
 }

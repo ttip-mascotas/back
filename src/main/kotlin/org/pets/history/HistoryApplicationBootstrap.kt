@@ -76,6 +76,6 @@ class HistoryApplicationBootstrap(
 
     private fun getAvatarURL(i: Int): String {
         val resource = resourceLoader.getResource("classpath:seed/$i.jpg")
-        return minioService.uploadFile(resource.inputStream, MediaType.IMAGE_JPEG_VALUE)
+        return minioService.uploadAvatar(resource.inputStream, MediaType.IMAGE_JPEG_VALUE)
     }
 }

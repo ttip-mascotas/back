@@ -46,5 +46,5 @@ minio:
   password: miniopassword
   host: http://127.0.0.1:9000
   public_bucket: public
-  analysis_bucket: analysis
+  analyses_bucket: analyses
   put_object_part_size: 10485760

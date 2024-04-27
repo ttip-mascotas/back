@@ -27,7 +27,7 @@ class MinioService(private val minioClient: MinioClient, private val minioProper
             throw MediaTypeNotValidException(contentType, supportedAnalysisContentTypes)
         }
         return uploadFileToBucket(
-            minioProperties.analysisBucket,
+            minioProperties.analysesBucket,
             "$petId/${generateUniqueFilename()}",
             stream,
             contentType

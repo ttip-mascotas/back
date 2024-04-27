@@ -55,6 +55,7 @@ class PetService(
         val foundPet = getPet(petId)
         val analysisURL = minioService.uploadPetAnalysis(petId, analysisFile.inputStream, analysisFile.contentType!!)
         val analysis = Analysis().apply {
+            name = analysisFile.originalFilename ?: "análisis.pdf"
             url = analysisURL
         }
         foundPet.attachAnalysis(analysis)

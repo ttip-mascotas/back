@@ -175,7 +175,7 @@ class PetController(
 
     @PostMapping(
         "/avatars",
-        consumes = [MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE]
     )
     fun uploadAvatar(
         @RequestPart("avatar") avatar: MultipartFile
@@ -183,7 +183,7 @@ class PetController(
 
     @PostMapping(
         "/{petId}/analyses",
-        consumes = [MediaType.APPLICATION_PDF_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_PDF_VALUE]
     )
     fun attachAnalysis(
         @PathVariable petId: Long,

@@ -5,17 +5,27 @@ import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import org.pets.history.configuration.properties.MinioProperties
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import java.io.InputStream
 import java.util.*
 
 @Component
 class MinioService(private val minioClient: MinioClient, private val minioProperties: MinioProperties) {
+    private val supportedAvatarContentTypes = setOf(MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE)
+    private val supportedAnalysisContentTypes = setOf(MediaType.APPLICATION_PDF_VALUE)
+
     fun uploadAvatar(stream: InputStream, contentType: String): String {
+        if (!supportedAvatarContentTypes.contains(contentType)) {
+            throw MediaTypeNotValidException(contentType, supportedAvatarContentTypes)
+        }
         return uploadFileToBucket(minioProperties.publicBucket, generateUniqueFilename(), stream, contentType)
     }
 
     fun uploadPetAnalysis(petId: Long, stream: InputStream, contentType: String): String {
+        if (!supportedAnalysisContentTypes.contains(contentType)) {
+            throw MediaTypeNotValidException(contentType, supportedAnalysisContentTypes)
+        }
         return uploadFileToBucket(
             minioProperties.analysisBucket,
             "$petId/${generateUniqueFilename()}",

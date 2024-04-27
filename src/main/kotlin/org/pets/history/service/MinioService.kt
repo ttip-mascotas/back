@@ -28,11 +28,11 @@ class MinioService(private val minioClient: MinioClient, private val minioProper
         return UUID.randomUUID().toString()
     }
 
-    private fun uploadFileToBucket(bucket: String, filePath: String, stream: InputStream, contentType: String): String {
+    private fun uploadFileToBucket(bucket: String, fileName: String, stream: InputStream, contentType: String): String {
         createBucket(bucket)
         val putObjectArgs = PutObjectArgs.builder()
             .bucket(bucket)
-            .`object`(filePath)
+            .`object`(fileName)
             .contentType(contentType)
             .stream(stream, -1, minioProperties.putObjectPartSize)
             .build()

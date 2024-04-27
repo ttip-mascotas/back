@@ -66,6 +66,12 @@ class Pet {
     @JsonView(View.Extended::class)
     var treatments: MutableSet<Treatment> = mutableSetOf()
 
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinColumn(name = "pet_id")
+    @OrderBy(value = "created_at DESC")
+    @JsonView(View.Extended::class)
+    var analyses: MutableSet<Analysis> = mutableSetOf()
+
     val age
         @JsonProperty
         get(): Int = Period.between(LocalDate.now(), this.birthdate).years.absoluteValue
@@ -76,6 +82,10 @@ class Pet {
 
     fun startTreatment(treatment: Treatment) {
         treatments.add(treatment)
+    }
+
+    fun attachAnalysis(analysis: Analysis) {
+        analyses.add(analysis)
     }
 }
 

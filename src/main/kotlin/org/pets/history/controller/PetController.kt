@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.pets.history.domain.Analysis
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
@@ -181,11 +182,11 @@ class PetController(
     ): FileDTO = FileDTO(minioService.uploadAvatar(avatar.inputStream, avatar.contentType!!))
 
     @PostMapping(
-        "/{petId}/analysis",
+        "/{petId}/analyses",
         consumes = [MediaType.APPLICATION_PDF_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
     )
-    fun uploadAnalysis(
+    fun attachAnalysis(
         @PathVariable petId: Long,
         @RequestPart("analysis") analysis: MultipartFile,
-    ): FileDTO = FileDTO(minioService.uploadPetAnalysis(petId, analysis.inputStream, analysis.contentType!!))
+    ): Analysis = petService.attachAnalysis(petId, analysis)
 }

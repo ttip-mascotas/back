@@ -2,20 +2,26 @@ package org.pets.history.service
 
 import jakarta.transaction.Transactional
 import jakarta.validation.Valid
+import org.pets.history.domain.Analysis
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
+import org.pets.history.repository.AnalysisRepository
 import org.pets.history.repository.MedicalVisitRepository
 import org.pets.history.repository.PetRepository
 import org.pets.history.repository.TreatmentRepository
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 @Transactional(Transactional.TxType.SUPPORTS)
 class PetService(
-        private val petRepository: PetRepository,
-        private val medicalVisitRepository: MedicalVisitRepository,
-        private val treatmentRepository: TreatmentRepository) {
+    private val petRepository: PetRepository,
+    private val medicalVisitRepository: MedicalVisitRepository,
+    private val treatmentRepository: TreatmentRepository,
+    private val analysisRepository: AnalysisRepository,
+    private val minioService: MinioService,
+) {
     fun getAllPets(): MutableIterable<Pet> = petRepository.findAll()
 
     fun getPet(id: Long): Pet = petRepository.findWithMedicalVisitsAndTreatmentsById(id).orElseThrow {
@@ -43,5 +49,17 @@ class PetService(
         foundPet.startTreatment(treatment)
         treatmentRepository.save(treatment)
         return treatment
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    fun attachAnalysis(petId: Long, analysisFile: MultipartFile): Analysis {
+        val foundPet = getPet(petId)
+        val analysisURL = minioService.uploadPetAnalysis(petId, analysisFile.inputStream, analysisFile.contentType!!)
+        val analysis = Analysis().apply {
+            url = analysisURL
+        }
+        foundPet.attachAnalysis(analysis)
+        analysisRepository.save(analysis)
+        return analysis
     }
 }

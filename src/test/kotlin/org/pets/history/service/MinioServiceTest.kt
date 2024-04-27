@@ -6,6 +6,7 @@ import io.minio.ObjectWriteResponse
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.justRun
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +36,7 @@ class MinioServiceTest {
     @BeforeEach
     fun setUp() {
         every { minioClient.bucketExists(any()) } returns false
-        every { minioClient.makeBucket(any()) } returns Unit
+        justRun { minioClient.makeBucket(any()) }
         every { minioClient.putObject(any()) } returns putObjectResult
     }
 
@@ -58,13 +59,16 @@ class MinioServiceTest {
 
         assertEquals("http://127.0.0.1:9000/$bucket/$filename", avatarURL)
 
-        verify { minioClient.bucketExists(any()) }
-        verify { minioClient.makeBucket(any()) }
-        verify { minioClient.putObject(any()) }
-        verify { putObjectResult.bucket() }
-        verify { putObjectResult.`object`() }
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
 
         confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
     }
 
     @Test
@@ -91,13 +95,16 @@ class MinioServiceTest {
             )
         }
 
-        verify(exactly = 0) { minioClient.bucketExists(any()) }
-        verify(exactly = 0) { minioClient.makeBucket(any()) }
-        verify(exactly = 0) { minioClient.putObject(any()) }
-        verify(exactly = 0) { putObjectResult.bucket() }
-        verify(exactly = 0) { putObjectResult.`object`() }
+        verify(exactly = 0) {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
 
         confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
     }
 
     @Test
@@ -122,13 +129,16 @@ class MinioServiceTest {
 
         assertEquals("http://127.0.0.1:9000/$bucket/$petId/$filename", analysisURL)
 
-        verify { minioClient.bucketExists(any()) }
-        verify { minioClient.makeBucket(any()) }
-        verify { minioClient.putObject(any()) }
-        verify { putObjectResult.bucket() }
-        verify { putObjectResult.`object`() }
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
 
         confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
     }
 
     @Test
@@ -157,13 +167,16 @@ class MinioServiceTest {
             )
         }
 
-        verify(exactly = 0) { minioClient.bucketExists(any()) }
-        verify(exactly = 0) { minioClient.makeBucket(any()) }
-        verify(exactly = 0) { minioClient.putObject(any()) }
-        verify(exactly = 0) { putObjectResult.bucket() }
-        verify(exactly = 0) { putObjectResult.`object`() }
+        verify(exactly = 0) {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
 
         confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
     }
 
     companion object {

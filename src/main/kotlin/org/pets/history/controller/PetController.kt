@@ -99,7 +99,7 @@ class PetController(
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     @JsonView(View.Compact::class)
-    fun registerPet(@RequestBody @Valid petIn: Pet): Pet = petService.registerPet(petIn)
+    fun registerPet(@RequestBody @Valid pet: Pet): Pet = petService.registerPet(pet)
 
     @GetMapping("/{petId}/medical-records")
     @Operation(

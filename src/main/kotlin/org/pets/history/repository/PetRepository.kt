@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository
 import java.util.*
 
 interface PetRepository : CrudRepository<Pet, Long> {
-    @EntityGraph(value = "joinWithMedicalVisitsAndTreatments", type = EntityGraph.EntityGraphType.FETCH)
-    fun findWithMedicalVisitsAndTreatmentsById(petId: Long): Optional<Pet>
+    @EntityGraph(value = "joinAll", type = EntityGraph.EntityGraphType.FETCH)
+    fun findWithAllRelatedById(petId: Long): Optional<Pet>
 }

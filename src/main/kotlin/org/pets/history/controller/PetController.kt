@@ -9,23 +9,31 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.pets.history.domain.Analysis
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
 import org.pets.history.serializer.CollectionDTO
+import org.pets.history.serializer.FileDTO
 import org.pets.history.serializer.View
+import org.pets.history.service.MinioService
 import org.pets.history.service.PetService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+
 
 @RestController
+@Validated
 @Tag(name = "pets", description = "Endpoints for managing pets")
 @CrossOrigin(origins = ["*"])
 @RequestMapping("pets")
-@Validated
-class PetController(private val petService: PetService) {
+class PetController(
+    private val petService: PetService,
+    private val minioService: MinioService
+) {
     @GetMapping("")
     @Operation(
         summary = "Retrieves all pets",
@@ -69,7 +77,7 @@ class PetController(private val petService: PetService) {
     @GetMapping("/{id}")
     @JsonView(View.Extended::class)
     fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
-    
+
     @Operation(
         summary = "Registers a pet",
         description = "Registers a pet",
@@ -91,7 +99,7 @@ class PetController(private val petService: PetService) {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     @JsonView(View.Compact::class)
-    fun registerPet(@RequestBody @Valid petIn: Pet): Pet = petService.registerPet(petIn)
+    fun registerPet(@RequestBody @Valid pet: Pet): Pet = petService.registerPet(pet)
 
     @GetMapping("/{petId}/medical-records")
     @Operation(
@@ -141,28 +149,44 @@ class PetController(private val petService: PetService) {
     ): MedicalVisit = petService.registerMedicalVisit(petId, medicalVisitIn)
 
     @Operation(
-            summary = "Start a treatment",
-            description = "Start a treatment for a given pet id",
+        summary = "Start a treatment",
+        description = "Start a treatment for a given pet id",
     )
     @ApiResponses(
-            value = [
-                ApiResponse(
-                        responseCode = "201",
-                        description = "Success",
-                        content = [
-                            Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = Schema(implementation = Treatment::class),
-                            )
-                        ]
-                )
-            ]
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = Treatment::class),
+                    )
+                ]
+            )
+        ]
     )
     @PostMapping("/{petId}/treatments")
-
     @ResponseStatus(HttpStatus.CREATED)
     fun startTreatment(
-            @PathVariable petId: Long,
-            @RequestBody @Valid treatment: Treatment
+        @PathVariable petId: Long,
+        @RequestBody @Valid treatment: Treatment
     ): Treatment = petService.startTreatment(petId, treatment)
+
+    @PostMapping(
+        "/avatars",
+        consumes = [MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
+    fun uploadAvatar(
+        @RequestPart("avatar") avatar: MultipartFile
+    ): FileDTO = FileDTO(minioService.uploadAvatar(avatar.inputStream, avatar.contentType!!))
+
+    @PostMapping(
+        "/{petId}/analyses",
+        consumes = [MediaType.APPLICATION_PDF_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
+    fun attachAnalysis(
+        @PathVariable petId: Long,
+        @RequestPart("analysis") analysis: MultipartFile,
+    ): Analysis = petService.attachAnalysis(petId, analysis)
 }

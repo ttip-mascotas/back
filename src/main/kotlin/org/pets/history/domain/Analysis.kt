@@ -18,6 +18,9 @@ class Analysis {
     var url: String = ""
 
     @Column(nullable = false)
+    var text: String = ""
+
+    @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreationTimestamp
     var createdAt: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)

@@ -2,7 +2,6 @@ package org.pets.history.service
 
 import jakarta.transaction.Transactional
 import org.pets.history.domain.Analysis
-import jakarta.validation.Valid
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -61,23 +60,16 @@ class PetService(
         val analysisURL = minioService.uploadPetAnalysis(petId, analysisFile.inputStream, analysisFile.contentType!!)
         val analysis = Analysis().apply {
             url = analysisURL
+            text = readText(analysisFile)
         }
         foundPet.attachAnalysis(analysis)
         analysisRepository.save(analysis)
         return analysis
     }
 
-    fun uploadAnalysis(pdfFile: MultipartFile): String {
-        var text: String
-
-        try {
-            val document: PDDocument = Loader.loadPDF(RandomAccessReadBuffer(pdfFile.inputStream))
-            val pdfStripper = PDFTextStripper()
-            text = pdfStripper.getText(document)
-        } catch (ex: Exception) {
-            text = "Error parsing PDF"
-        }
-
-        return text
+    fun readText(pdfFile: MultipartFile): String {
+        val document: PDDocument = Loader.loadPDF(RandomAccessReadBuffer(pdfFile.inputStream))
+        val pdfStripper = PDFTextStripper()
+        return pdfStripper.getText(document)
     }
 }

@@ -5,6 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.ninjasquad.springmockk.MockkBean
 import io.minio.MinioClient
+import io.minio.ObjectWriteResponse
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.justRun
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,20 +18,21 @@ import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
 import org.pets.history.repository.PetRepository
-import org.pets.history.service.MinioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 @SpringBootTest
@@ -42,17 +49,20 @@ class PetControllerTest {
     @MockkBean
     private lateinit var minioClient: MinioClient
 
-    @MockkBean
-    private lateinit var minioService: MinioService
-
     @Autowired
     private lateinit var petRepository: PetRepository
+
+    @MockK
+    private lateinit var putObjectResult: ObjectWriteResponse
 
     @BeforeEach
     fun setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
         mapper.registerModule(JavaTimeModule())
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        every { minioClient.bucketExists(any()) } returns false
+        justRun { minioClient.makeBucket(any()) }
+        every { minioClient.putObject(any()) } returns putObjectResult
     }
 
     @AfterEach
@@ -287,6 +297,141 @@ class PetControllerTest {
                 .content(json)
         )
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `Given an avatar, uploads it successfully`() {
+        val file = MockMultipartFile(
+            "avatar",
+            "avatar.jpg",
+            MediaType.IMAGE_JPEG_VALUE,
+            "an_image".toByteArray()
+        )
+        val bucket = "public"
+        val filename = UUID.randomUUID().toString()
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns filename
+
+        val avatarURL = "http://127.0.0.1:9000/$bucket/$filename"
+
+        mockMvc.perform(
+            multipart("/pets/avatars")
+                .file(file)
+        )
+            .andExpect(status().isCreated)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.url").value(avatarURL))
+
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+    }
+
+    @Test
+    fun `Given an avatar that is not an image, the upload fails`() {
+        val file = MockMultipartFile(
+            "avatar",
+            "avatar.xml",
+            MediaType.APPLICATION_XML_VALUE,
+            "an_xml".toByteArray()
+        )
+
+        mockMvc.perform(
+            multipart("/pets/avatars")
+                .file(file)
+        ).andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+
+        verify(exactly = 0) {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+    }
+
+    @Test
+    fun `Given a pet id and an analysis file, uploads it successfully`() {
+        val pet = petRepository.save(anyPet())
+
+        val file = MockMultipartFile(
+            "analysis",
+            "pet_analysis.pdf",
+            MediaType.APPLICATION_PDF_VALUE,
+            "a_pdf".toByteArray()
+        )
+        val bucket = "public"
+        val filename = UUID.randomUUID().toString()
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns "${pet.id}/$filename"
+
+        val analysisURL = "http://127.0.0.1:9000/$bucket/${pet.id}/$filename"
+
+        mockMvc.perform(
+            multipart("/pets/${pet.id}/analyses")
+                .file(file)
+        )
+            .andExpect(status().isCreated)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").isNumber)
+            .andExpect(jsonPath("$.name").value("pet_analysis.pdf"))
+            .andExpect(jsonPath("$.url").value(analysisURL))
+            .andExpect(jsonPath("$.createdAt").isNotEmpty)
+
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+    }
+
+    @Test
+    fun `Given a pet id and an analysis file that is not a PDF, the upload fails`() {
+        val pet = petRepository.save(anyPet())
+
+        val file = MockMultipartFile(
+            "analysis",
+            "pet_analysis.xml",
+            MediaType.APPLICATION_XML_VALUE,
+            "an_xml".toByteArray()
+        )
+
+        mockMvc.perform(
+            multipart("/pets/${pet.id}/analyses")
+                .file(file)
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+
+        verify(exactly = 0) {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
     }
 
 }

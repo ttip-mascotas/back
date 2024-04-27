@@ -373,7 +373,7 @@ class PetControllerTest {
             MediaType.APPLICATION_PDF_VALUE,
             "a_pdf".toByteArray()
         )
-        val bucket = "public"
+        val bucket = "analyses"
         val filename = UUID.randomUUID().toString()
 
         every { putObjectResult.bucket() } returns bucket
@@ -389,6 +389,47 @@ class PetControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").isNumber)
             .andExpect(jsonPath("$.name").value("pet_analysis.pdf"))
+            .andExpect(jsonPath("$.url").value(analysisURL))
+            .andExpect(jsonPath("$.createdAt").isNotEmpty)
+
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+    }
+
+    @Test
+    fun `Given a pet id and an analysis file, when the analysis file has no original file name, uploads it successfully with a default name`() {
+        val pet = petRepository.save(anyPet())
+
+        val file = MockMultipartFile(
+            "analysis",
+            null,
+            MediaType.APPLICATION_PDF_VALUE,
+            "a_pdf".toByteArray()
+        )
+        val bucket = "analyses"
+        val filename = UUID.randomUUID().toString()
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns "${pet.id}/$filename"
+
+        val analysisURL = "http://127.0.0.1:9000/$bucket/${pet.id}/$filename"
+
+        mockMvc.perform(
+            multipart("/pets/${pet.id}/analyses")
+                .file(file)
+        ).andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isCreated)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").isNumber)
+            .andExpect(jsonPath("$.name").value("análisis.pdf"))
             .andExpect(jsonPath("$.url").value(analysisURL))
             .andExpect(jsonPath("$.createdAt").isNotEmpty)
 

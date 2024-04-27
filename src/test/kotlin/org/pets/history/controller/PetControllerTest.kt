@@ -3,6 +3,7 @@ package org.pets.history.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.ninjasquad.springmockk.MockkBean
 import io.minio.MinioClient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -15,7 +16,6 @@ import org.pets.history.service.MinioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -39,10 +39,10 @@ class PetControllerTest {
     @Autowired
     private lateinit var context: WebApplicationContext
 
-    @MockBean
+    @MockkBean
     private lateinit var minioClient: MinioClient
 
-    @MockBean
+    @MockkBean
     private lateinit var minioService: MinioService
 
     @Autowired

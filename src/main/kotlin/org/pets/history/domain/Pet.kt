@@ -16,9 +16,10 @@ import kotlin.math.absoluteValue
 @Entity
 @NamedEntityGraphs(
     NamedEntityGraph(
-        name = "joinWithMedicalVisitsAndTreatments", attributeNodes = [
+        name = "joinAll", attributeNodes = [
             NamedAttributeNode("medicalVisits"),
-            NamedAttributeNode("treatments")
+            NamedAttributeNode("treatments"),
+            NamedAttributeNode("analyses"),
         ]
     )
 )

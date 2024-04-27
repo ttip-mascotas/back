@@ -24,7 +24,7 @@ class PetService(
 ) {
     fun getAllPets(): MutableIterable<Pet> = petRepository.findAll()
 
-    fun getPet(id: Long): Pet = petRepository.findWithMedicalVisitsAndTreatmentsById(id).orElseThrow {
+    fun getPet(id: Long): Pet = petRepository.findWithAllRelatedById(id).orElseThrow {
         NotFoundException("No existe la mascota con identificador $id")
     }
 

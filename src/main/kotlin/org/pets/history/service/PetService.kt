@@ -1,7 +1,6 @@
 package org.pets.history.service
 
 import jakarta.transaction.Transactional
-import jakarta.validation.Valid
 import org.pets.history.domain.Analysis
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
@@ -29,14 +28,14 @@ class PetService(
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    fun registerPet(@Valid pet: Pet): Pet {
+    fun registerPet(pet: Pet): Pet {
         return petRepository.save(pet)
     }
 
     fun getMedicalVisits(petId: Long): Iterable<MedicalVisit> = getPet(petId).medicalVisits
 
     @Transactional(Transactional.TxType.REQUIRED)
-    fun registerMedicalVisit(petId: Long, @Valid medicalVisit: MedicalVisit): MedicalVisit {
+    fun registerMedicalVisit(petId: Long, medicalVisit: MedicalVisit): MedicalVisit {
         val foundPet = getPet(petId)
         foundPet.addMedicalVisit(medicalVisit)
         medicalVisitRepository.save(medicalVisit)

@@ -21,6 +21,9 @@ class Analysis {
     @NotEmpty(message = "Es necesario que introduzcas una ruta de archivo")
     var url: String = ""
 
+    @Column(columnDefinition="TEXT")
+    var text: String = ""
+
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreationTimestamp

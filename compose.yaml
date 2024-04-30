@@ -77,9 +77,9 @@ services:
       /usr/bin/mc rm -r --force minio/public/;
       /usr/bin/mc mb minio/public;
       /usr/bin/mc anonymous set download minio/public;
-      /usr/bin/mc rm -r --force minio/analysis/;
-      /usr/bin/mc mb minio/analysis;
-      /usr/bin/mc anonymous set download minio/analysis;
+      /usr/bin/mc rm -r --force minio/analyses/;
+      /usr/bin/mc mb minio/analyses;
+      /usr/bin/mc anonymous set download minio/analyses;
       exit 0;
       "
     profiles:

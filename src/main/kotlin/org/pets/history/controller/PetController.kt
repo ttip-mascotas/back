@@ -175,16 +175,18 @@ class PetController(
 
     @PostMapping(
         "/avatars",
-        consumes = [MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE]
     )
+    @ResponseStatus(HttpStatus.CREATED)
     fun uploadAvatar(
         @RequestPart("avatar") avatar: MultipartFile
     ): FileDTO = FileDTO(minioService.uploadAvatar(avatar.inputStream, avatar.contentType!!))
 
     @PostMapping(
         "/{petId}/analyses",
-        consumes = [MediaType.APPLICATION_PDF_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE]
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_PDF_VALUE]
     )
+    @ResponseStatus(HttpStatus.CREATED)
     fun attachAnalysis(
         @PathVariable petId: Long,
         @RequestPart("analysis") analysis: MultipartFile,

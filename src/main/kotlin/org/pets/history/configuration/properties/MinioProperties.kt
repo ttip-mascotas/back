@@ -29,8 +29,8 @@ data class MinioProperties(
     val publicBucket: String,
 
     @NotBlank
-    @Value("\${analysis_bucket}")
-    val analysisBucket: String,
+    @Value("\${analyses_bucket}")
+    val analysesBucket: String,
 
     @Max(value = 15728640)
     @Value("\${put_object_part_size}")

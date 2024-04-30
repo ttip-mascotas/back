@@ -14,6 +14,10 @@ class Analysis {
     var id: Long? = null
 
     @Column(length = 256, nullable = false)
+    @NotEmpty(message = "Es necesario que introduzcas una nombre de archivo")
+    var name: String = ""
+
+    @Column(length = 256, nullable = false)
     @NotEmpty(message = "Es necesario que introduzcas una ruta de archivo")
     var url: String = ""
 

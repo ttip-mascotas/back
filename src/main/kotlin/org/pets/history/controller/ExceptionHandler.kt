@@ -1,5 +1,6 @@
 package org.pets.history.controller
 
+import org.pets.history.service.MediaTypeNotValidException
 import org.pets.history.service.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -13,24 +14,28 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 class ExceptionHandler {
 
     @ExceptionHandler(NotFoundException::class)
-    fun notFoundHandler(exception: Exception) : ResponseEntity<RuntimeException> {
+    fun handleNotFound(exception: Exception): ResponseEntity<RuntimeException> {
         return ResponseEntity(RuntimeException(exception.message), HttpStatus.NOT_FOUND)
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidationErrors(exception: MethodArgumentNotValidException): ResponseEntity<Map<String, List<String>>> {
-        val messages = exception.allErrors.mapNotNull { error -> error.defaultMessage }
+    @ExceptionHandler(MediaTypeNotValidException::class)
+    fun handleMediaTypeNotValid(exception: Exception): ResponseEntity<RuntimeException> {
+        return ResponseEntity(RuntimeException(exception.message), HttpStatus.BAD_REQUEST)
+    }
 
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValid(exception: MethodArgumentNotValidException): ResponseEntity<Map<String, List<String>>> {
+        val messages = exception.allErrors.mapNotNull { error -> error.defaultMessage }
         return ResponseEntity(getMessages(messages), HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleException(exception: HttpMessageNotReadableException): ResponseEntity<RuntimeException> {
+    fun handleHttpMessageNotReadable(exception: HttpMessageNotReadableException): ResponseEntity<RuntimeException> {
         return ResponseEntity(RuntimeException(exception.message), HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(Exception::class)
-    fun unexpectedHandler(exception: Exception) : ResponseEntity<RuntimeException> {
+    fun handleUnexpected(exception: Exception): ResponseEntity<RuntimeException> {
         return ResponseEntity(RuntimeException(exception.message), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

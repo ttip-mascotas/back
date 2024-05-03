@@ -29,6 +29,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import java.io.File
+import java.nio.file.Files
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -367,11 +369,14 @@ class PetControllerTest {
     fun `Given a pet id and an analysis file, uploads it successfully`() {
         val pet = petRepository.save(anyPet())
 
-        val file = MockMultipartFile(
+        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
+        val fileBytes = Files.readAllBytes(file.toPath())
+
+        val multipartFile = MockMultipartFile(
             "analysis",
-            "pet_analysis.pdf",
+            file.name,
             MediaType.APPLICATION_PDF_VALUE,
-            "a_pdf".toByteArray()
+                fileBytes
         )
         val bucket = "analyses"
         val filename = UUID.randomUUID().toString()
@@ -383,13 +388,14 @@ class PetControllerTest {
 
         mockMvc.perform(
             multipart("/pets/${pet.id}/analyses")
-                .file(file)
+                .file(multipartFile)
         )
             .andExpect(status().isCreated)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.name").value("pet_analysis.pdf"))
+            .andExpect(jsonPath("$.name").value(file.name))
             .andExpect(jsonPath("$.url").value(analysisURL))
+            .andExpect(jsonPath("$.text").value("Dummy PDF file\n"))
             .andExpect(jsonPath("$.createdAt").isNotEmpty)
 
         verify {
@@ -408,11 +414,14 @@ class PetControllerTest {
     fun `Given a pet id and an analysis file, when the analysis file has no original file name, uploads it successfully with a default name`() {
         val pet = petRepository.save(anyPet())
 
-        val file = MockMultipartFile(
+        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
+        val fileBytes = Files.readAllBytes(file.toPath())
+
+        val multipartFile = MockMultipartFile(
             "analysis",
             null,
             MediaType.APPLICATION_PDF_VALUE,
-            "a_pdf".toByteArray()
+            fileBytes
         )
         val bucket = "analyses"
         val filename = UUID.randomUUID().toString()
@@ -424,13 +433,14 @@ class PetControllerTest {
 
         mockMvc.perform(
             multipart("/pets/${pet.id}/analyses")
-                .file(file)
+                .file(multipartFile)
         ).andDo(MockMvcResultHandlers.print())
             .andExpect(status().isCreated)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").isNumber)
             .andExpect(jsonPath("$.name").value("análisis.pdf"))
             .andExpect(jsonPath("$.url").value(analysisURL))
+            .andExpect(jsonPath("$.text").value("Dummy PDF file\n"))
             .andExpect(jsonPath("$.createdAt").isNotEmpty)
 
         verify {

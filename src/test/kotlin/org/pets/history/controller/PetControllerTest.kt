@@ -376,7 +376,7 @@ class PetControllerTest {
             "analysis",
             file.name,
             MediaType.APPLICATION_PDF_VALUE,
-                fileBytes
+            fileBytes
         )
         val bucket = "analyses"
         val filename = UUID.randomUUID().toString()
@@ -394,8 +394,7 @@ class PetControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").isNumber)
             .andExpect(jsonPath("$.name").value(file.name))
-            .andExpect(jsonPath("$.url").value(analysisURL))
-            .andExpect(jsonPath("$.text").value("Dummy PDF file\n"))
+            .andExpect(jsonPath("$.size").value(13264))
             .andExpect(jsonPath("$.createdAt").isNotEmpty)
 
         verify {
@@ -439,8 +438,7 @@ class PetControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").isNumber)
             .andExpect(jsonPath("$.name").value("análisis.pdf"))
-            .andExpect(jsonPath("$.url").value(analysisURL))
-            .andExpect(jsonPath("$.text").value("Dummy PDF file\n"))
+            .andExpect(jsonPath("$.size").value(13264))
             .andExpect(jsonPath("$.createdAt").isNotEmpty)
 
         verify {

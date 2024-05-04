@@ -1,5 +1,6 @@
 package org.pets.history.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import org.hibernate.annotations.CreationTimestamp
@@ -17,11 +18,16 @@ class Analysis {
     @NotEmpty(message = "Es necesario que introduzcas una nombre de archivo")
     var name: String = ""
 
+    @Column(nullable = false)
+    var size: Long = 0
+
     @Column(length = 256, nullable = false)
     @NotEmpty(message = "Es necesario que introduzcas una ruta de archivo")
+    @JsonIgnore
     var url: String = ""
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
+    @JsonIgnore
     var text: String = ""
 
     @Column(nullable = false)

@@ -1,11 +1,11 @@
 package org.pets.history.service
 
 import jakarta.transaction.Transactional
-import org.pets.history.domain.Analysis
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
+import org.pets.history.domain.Analysis
 import org.pets.history.domain.MedicalVisit
 import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
@@ -61,6 +61,7 @@ class PetService(
         val defaultFilename = "análisis.pdf"
         val analysis = Analysis().apply {
             name = analysisFile.originalFilename?.ifBlank { defaultFilename } ?: defaultFilename
+            size = analysisFile.size
             url = analysisURL
             text = readText(analysisFile)
         }

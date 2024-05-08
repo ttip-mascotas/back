@@ -5,14 +5,8 @@ import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
-import org.pets.history.domain.Analysis
-import org.pets.history.domain.MedicalVisit
-import org.pets.history.domain.Pet
-import org.pets.history.domain.Treatment
-import org.pets.history.repository.AnalysisRepository
-import org.pets.history.repository.MedicalVisitRepository
-import org.pets.history.repository.PetRepository
-import org.pets.history.repository.TreatmentRepository
+import org.pets.history.domain.*
+import org.pets.history.repository.*
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -23,6 +17,7 @@ class PetService(
     private val medicalVisitRepository: MedicalVisitRepository,
     private val treatmentRepository: TreatmentRepository,
     private val analysisRepository: AnalysisRepository,
+    private val analysisIndexRepository: IndexedAnalysisRepository,
     private val minioService: MinioService,
 ) {
     fun getAllPets(): MutableIterable<Pet> = petRepository.findAll()
@@ -58,15 +53,26 @@ class PetService(
     fun attachAnalysis(petId: Long, analysisFile: MultipartFile): Analysis {
         val foundPet = getPet(petId)
         val analysisURL = minioService.uploadPetAnalysis(petId, analysisFile.inputStream, analysisFile.contentType!!)
+
         val defaultFilename = "análisis.pdf"
+        val fileText = readText(analysisFile)
+
         val analysis = Analysis().apply {
             name = analysisFile.originalFilename?.ifBlank { defaultFilename } ?: defaultFilename
             size = analysisFile.size
             url = analysisURL
-            text = readText(analysisFile)
+            text = fileText
         }
+
         foundPet.attachAnalysis(analysis)
         analysisRepository.save(analysis)
+
+        val indexedAnalysis = IndexedAnalysis().apply {
+            analysisId = analysis.id
+            text = fileText
+        }
+        analysisIndexRepository.save(indexedAnalysis)
+        
         return analysis
     }
 

@@ -48,3 +48,8 @@ minio:
   public_bucket: public
   analyses_bucket: analyses
   put_object_part_size: 10485760
+
+elasticsearch:
+  http:
+    enabled: true
+    port: 9200

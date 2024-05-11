@@ -25,6 +25,9 @@ spring:
         connection:
           pool_size: 50
 
+  flyway:
+    enabled: false
+
   jackson:
     mapper:
       default-view-inclusion: true

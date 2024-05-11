@@ -10,9 +10,10 @@ interface AnalysisRepository : CrudRepository<Analysis, Long> {
         value = """
             SELECT * 
             FROM Analysis a 
-            WHERE to_tsvector('spanish', a.name || ' ' || a.text) @@ websearch_to_tsquery('spanish', :query)
+            WHERE a.pet_id = :petId 
+            AND to_tsvector('spanish', a.name || ' ' || a.text) @@ websearch_to_tsquery('spanish', :query)
         """,
         nativeQuery = true
     )
-    fun search(@Param("query") query: String): List<Analysis>
+    fun search(@Param("petId") petId: Long, @Param("query") query: String): Iterable<Analysis>
 }

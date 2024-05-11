@@ -11,7 +11,7 @@ interface AnalysisRepository : CrudRepository<Analysis, Long> {
             SELECT * 
             FROM Analysis a 
             WHERE a.pet_id = :petId 
-            AND to_tsvector('spanish', a.name || ' ' || a.text) @@ websearch_to_tsquery('spanish', :query)
+            AND TO_TSVECTOR('spanish', a.name || ' ' || a.text) @@ WEBSEARCH_TO_TSQUERY('spanish', :query)
         """,
         nativeQuery = true
     )

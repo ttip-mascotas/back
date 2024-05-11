@@ -384,8 +384,6 @@ class PetControllerTest {
         every { putObjectResult.bucket() } returns bucket
         every { putObjectResult.`object`() } returns "${pet.id}/$filename"
 
-        val analysisURL = "http://127.0.0.1:9000/$bucket/${pet.id}/$filename"
-
         mockMvc.perform(
             multipart("/pets/${pet.id}/analyses")
                 .file(multipartFile)
@@ -427,8 +425,6 @@ class PetControllerTest {
 
         every { putObjectResult.bucket() } returns bucket
         every { putObjectResult.`object`() } returns "${pet.id}/$filename"
-
-        val analysisURL = "http://127.0.0.1:9000/$bucket/${pet.id}/$filename"
 
         mockMvc.perform(
             multipart("/pets/${pet.id}/analyses")
@@ -482,5 +478,55 @@ class PetControllerTest {
         confirmVerified(minioClient)
         confirmVerified(putObjectResult)
     }
+
+// TODO: re-habilitar luego de consultar si podemos usar testcontainers para éste o todos los tests porque H2
+//  no soporta TO_TSVECTOR ni WEBSEARCH_TO_TSQUERY de PostgreSQL
+
+//    @Test
+//    fun `Given a pet id and search criteria, return a single file that matches the criteria`() {
+//        val pet = petRepository.save(anyPet())
+//
+//        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
+//        val fileBytes = Files.readAllBytes(file.toPath())
+//
+//        val multipartFile = MockMultipartFile(
+//            "analysis",
+//            file.name,
+//            MediaType.APPLICATION_PDF_VALUE,
+//            fileBytes
+//        )
+//        val bucket = "analyses"
+//        val filename = UUID.randomUUID().toString()
+//
+//        every { putObjectResult.bucket() } returns bucket
+//        every { putObjectResult.`object`() } returns "${pet.id}/$filename"
+//
+//        mockMvc.perform(
+//            multipart("/pets/${pet.id}/analyses")
+//                .file(multipartFile)
+//        )
+//            .andExpect(status().isCreated)
+//
+//        verify {
+//            minioClient.bucketExists(any())
+//            minioClient.makeBucket(any())
+//            minioClient.putObject(any())
+//            putObjectResult.bucket()
+//            putObjectResult.`object`()
+//        }
+//
+//        confirmVerified(minioClient)
+//        confirmVerified(putObjectResult)
+//
+//        mockMvc.perform(
+//            get("/pets/${pet.id}/analyses?q=dummy")
+//        )
+//            .andExpect(status().isOk)
+//            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//            .andExpect(jsonPath("$.id").isNumber)
+//            .andExpect(jsonPath("$.name").value(file.name))
+//            .andExpect(jsonPath("$.size").value(13264))
+//            .andExpect(jsonPath("$.createdAt").isNotEmpty)
+//    }
 
 }

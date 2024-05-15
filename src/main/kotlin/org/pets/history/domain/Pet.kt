@@ -83,6 +83,7 @@ class Pet {
     }
 
     fun startTreatment(treatment: Treatment) {
+        treatment.start()
         treatments.add(treatment)
     }
 

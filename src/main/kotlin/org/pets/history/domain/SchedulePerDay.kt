@@ -12,6 +12,6 @@ class SchedulePerDay {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     lateinit var date: LocalDate
     @JoinColumn(name = "schedule_per_day_id")
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     lateinit var doseControllers: MutableSet<DoseControl>
 }

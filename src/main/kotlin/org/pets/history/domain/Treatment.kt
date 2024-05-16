@@ -1,11 +1,9 @@
 package org.pets.history.domain
 
-import com.fasterxml.jackson.annotation.JsonView
 import jakarta.persistence.*
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.FutureOrPresent
 import jakarta.validation.constraints.NotEmpty
-import org.pets.history.serializer.View
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -14,13 +12,6 @@ import java.util.*
 
 
 @Entity
-@NamedEntityGraphs(
-        NamedEntityGraph(
-                name = "join", attributeNodes = [
-            NamedAttributeNode("calendar"),
-                ]
-        )
-)
 class Treatment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -47,17 +38,12 @@ class Treatment {
     @DecimalMin(value = "1", message = "Es necesario que introduzcas una cantidad mayor o igual a 1")
     var numberOfTimes: Int = 0
 
-    @JoinColumn(name = "calendar_id")
-    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JsonView(View.Extended::class)
-    var calendar: TreatmentCalendar? = null
+    @JoinColumn(name = "treatment_id")
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+    var schedulesPerDay: MutableSet<SchedulePerDay> = mutableSetOf()
 
     fun start() {
-        val schedulesPerDay = schedulesPerDays(organizeByDate())
-
-        calendar = TreatmentCalendar().apply {
-            this.schedulesPerDay = schedulesPerDay
-        }
+        this.schedulesPerDay = schedulesPerDays(organizeByDate())
     }
 
     private fun organizeByDate(): HashMap<String, MutableSet<LocalDateTime>> {

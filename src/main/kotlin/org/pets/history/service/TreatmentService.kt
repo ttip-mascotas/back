@@ -11,7 +11,7 @@ class TreatmentService(
 ) {
 
     fun getTreatment(treatmentId: Long): Treatment {
-        return treatmentRepository.findWithCalendarById(treatmentId).orElseThrow {
+        return treatmentRepository.findById(treatmentId).orElseThrow {
             NotFoundException("No existe el tratamiento con identificador $treatmentId")
         }
     }

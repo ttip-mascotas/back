@@ -53,7 +53,7 @@ class PetController(
         ]
     )
     @GetMapping("")
-    @JsonView(View.Compact::class)
+    @JsonView(View.CompactPet::class)
     fun getAllPets(): CollectionDTO<Pet> = CollectionDTO(petService.getAllPets())
 
     @Operation(
@@ -75,7 +75,7 @@ class PetController(
         ]
     )
     @GetMapping("/{id}")
-    @JsonView(View.Extended::class)
+    @JsonView(View.ExtendedPet::class)
     fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
 
     @Operation(
@@ -98,7 +98,7 @@ class PetController(
     )
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    @JsonView(View.Compact::class)
+    @JsonView(View.CompactPet::class)
     fun registerPet(@RequestBody @Valid pet: Pet): Pet = petService.registerPet(pet)
 
     @Operation(
@@ -168,6 +168,7 @@ class PetController(
     )
     @PostMapping("/{petId}/treatments")
     @ResponseStatus(HttpStatus.CREATED)
+    @JsonView(View.CompactTreatment::class)
     fun startTreatment(
         @PathVariable petId: Long,
         @RequestBody @Valid treatment: Treatment
@@ -251,7 +252,7 @@ class PetController(
         ]
     )
     @GetMapping("/{id}/analyses")
-    @JsonView(View.Extended::class)
+    @JsonView(View.ExtendedPet::class)
     fun searchAnalyses(@PathVariable id: Long, @RequestParam(name = "q") query: String): CollectionDTO<Analysis> =
         CollectionDTO(petService.searchAnalyses(id, query))
 }

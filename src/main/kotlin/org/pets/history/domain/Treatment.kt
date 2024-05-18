@@ -1,14 +1,15 @@
 package org.pets.history.domain
 
+import com.fasterxml.jackson.annotation.JsonView
 import jakarta.persistence.*
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.FutureOrPresent
 import jakarta.validation.constraints.NotEmpty
+import org.pets.history.serializer.View
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 
 @Entity
@@ -38,8 +39,10 @@ class Treatment {
     @DecimalMin(value = "1", message = "Es necesario que introduzcas una cantidad mayor o igual a 1")
     var numberOfTimes: Int = 0
 
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "treatment_id")
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy(value = "date ASC")
+    @JsonView(View.ExtendedTreatment::class)
     var schedulesPerDay: MutableSet<SchedulePerDay> = mutableSetOf()
 
     fun start() {
@@ -59,7 +62,11 @@ class Treatment {
         return schedule
     }
 
-    private fun addDateTimeByDate(formatter: DateTimeFormatter, lastDate: LocalDateTime, list: HashMap<String, MutableSet<LocalDateTime>>) {
+    private fun addDateTimeByDate(
+        formatter: DateTimeFormatter,
+        lastDate: LocalDateTime,
+        list: HashMap<String, MutableSet<LocalDateTime>>
+    ) {
         val key = formatter.format(lastDate)
         if (list.containsKey(key)) {
             list[key]?.add(lastDate)
@@ -69,15 +76,15 @@ class Treatment {
     }
 
     private fun schedulesPerDays(dates: HashMap<String, MutableSet<LocalDateTime>>) =
-            dates.keys.map {
-                SchedulePerDay().apply {
-                    date = LocalDate.parse(it)
-                    doseControllers = dates[it]?.map {
-                        DoseControl().apply {
-                            time = it
-                            supplied = false
-                        }
-                    }?.toMutableSet() ?: mutableSetOf()
-                }
-            }.toMutableSet()
+        dates.keys.map {
+            SchedulePerDay().apply {
+                date = LocalDate.parse(it)
+                doseControls = dates[it]?.map {
+                    DoseControl().apply {
+                        time = it
+                        supplied = false
+                    }
+                }?.toMutableSet() ?: mutableSetOf()
+            }
+        }.toMutableSet()
 }

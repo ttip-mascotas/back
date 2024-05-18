@@ -1,6 +1,8 @@
 package org.pets.history.serializer
 
 class View {
-    interface Compact
-    interface Extended
+    interface CompactPet
+    interface ExtendedPet
+    interface CompactTreatment
+    interface ExtendedTreatment
 }

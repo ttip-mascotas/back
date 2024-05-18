@@ -16,7 +16,7 @@ import kotlin.math.absoluteValue
 @Entity
 @NamedEntityGraphs(
     NamedEntityGraph(
-        name = "joinAll", attributeNodes = [
+        name = "joinPetWithAll", attributeNodes = [
             NamedAttributeNode("medicalVisits"),
             NamedAttributeNode("treatments"),
             NamedAttributeNode("analyses"),
@@ -59,19 +59,19 @@ class Pet {
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "pet_id")
     @OrderBy(value = "datetime DESC")
-    @JsonView(View.Extended::class)
+    @JsonView(View.ExtendedPet::class)
     var medicalVisits: MutableSet<MedicalVisit> = mutableSetOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "pet_id")
     @OrderBy(value = "datetime DESC")
-    @JsonView(View.Extended::class)
+    @JsonView(View.ExtendedPet::class)
     var treatments: MutableSet<Treatment> = mutableSetOf()
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "pet_id")
     @OrderBy(value = "created_at DESC")
-    @JsonView(View.Extended::class)
+    @JsonView(View.ExtendedPet::class)
     var analyses: MutableSet<Analysis> = mutableSetOf()
 
     val age

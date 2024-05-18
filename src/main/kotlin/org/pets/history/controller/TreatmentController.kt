@@ -20,31 +20,27 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin(origins = ["*"])
 @RequestMapping("treatments")
 class TreatmentController(
-        private val treatmentService: TreatmentService
+    private val treatmentService: TreatmentService
 ) {
-
-
     @Operation(
-            summary = "Get a treatment",
-            description = "Get a treatment by id",
+        summary = "Get a treatment",
+        description = "Get a treatment by id",
     )
     @ApiResponses(
-            value = [
-                ApiResponse(
-                        responseCode = "200",
-                        description = "Success",
-                        content = [
-                            Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = Schema(implementation = Treatment::class),
-                            )
-                        ]
-                )
-            ]
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = Treatment::class),
+                    )
+                ]
+            )
+        ]
     )
     @GetMapping("/{id}")
-    @JsonView(View.Compact::class)
-    fun getTreatment(
-            @PathVariable id: Long,
-    ): Treatment = treatmentService.getTreatment(id)
+    @JsonView(View.ExtendedTreatment::class)
+    fun getTreatment(@PathVariable id: Long): Treatment = treatmentService.getTreatment(id)
 }

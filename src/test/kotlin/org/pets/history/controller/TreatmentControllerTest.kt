@@ -12,21 +12,23 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class TreatmentControllerTest {
+    private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     private lateinit var mockMvc: MockMvc
     private lateinit var treatmentWithId: Treatment
     private lateinit var treatmentWithCalendar: Treatment
-    private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
+    @Autowired
+    private lateinit var context: WebApplicationContext
 
     @Autowired
     private lateinit var petRepository: PetRepository
@@ -34,15 +36,12 @@ class TreatmentControllerTest {
     @Autowired
     private lateinit var treatmentRepository: TreatmentRepository
 
-    @Autowired
-    private lateinit var context: WebApplicationContext
-
     @BeforeEach
     fun setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
 
-        val aPet = aPet()
-        treatmentWithCalendar = aTreatment()
+        val aPet = anyPet()
+        treatmentWithCalendar = anyTreatment()
         aPet.startTreatment(treatmentWithCalendar)
         petRepository.save(aPet)
         treatmentWithId = treatmentRepository.save(treatmentWithCalendar)
@@ -53,7 +52,7 @@ class TreatmentControllerTest {
         petRepository.deleteAll()
     }
 
-    fun aTreatment(): Treatment {
+    fun anyTreatment(): Treatment {
         return Treatment().apply {
             medicine = "Tramadol"
             datetime = LocalDateTime.of(LocalDateTime.now().plusYears(1).year, 3, 1, 0, 0, 0)
@@ -63,7 +62,7 @@ class TreatmentControllerTest {
         }
     }
 
-    fun aPet(): Pet {
+    fun anyPet(): Pet {
         return Pet().apply {
             name = "Pippin"
             photo = "https://a.fake.img.png"
@@ -78,30 +77,30 @@ class TreatmentControllerTest {
     fun `Given a treatment id that does exist, obtain the treatment with his calendar`() {
         val id = treatmentWithId.id
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/treatments/$id")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-        )
-                .andExpect(status().isOk)
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.medicine").value(treatmentWithId.medicine))
-                .andExpect(jsonPath("$.dose").value(treatmentWithId.dose))
-                .andExpect(jsonPath("$.datetime").value(treatmentWithId.datetime.format(datetimeFormatter)))
-                .andExpect(jsonPath("$.frequency").value(treatmentWithId.frequency))
-                .andExpect(jsonPath("$.numberOfTimes").value(treatmentWithId.numberOfTimes))
-                .andExpect(jsonPath("$.schedulesPerDay").isNotEmpty)
+        mockMvc.get("/treatments/$id") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.medicine") { value(treatmentWithId.medicine) }
+            jsonPath("$.dose") { value(treatmentWithId.dose) }
+            jsonPath("$.datetime") { value(treatmentWithId.datetime.format(datetimeFormatter)) }
+            jsonPath("$.frequency") { value(treatmentWithId.frequency) }
+            jsonPath("$.numberOfTimes") { value(treatmentWithId.numberOfTimes) }
+            jsonPath("$.schedulesPerDay") { isNotEmpty() }
+        }
     }
 
     @Test
     fun `Given a treatment id that does not exist, fail to get said record and return an error`() {
         val id = 99
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/treatments/$id")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-        )
-                .andExpect(status().isNotFound)
+        mockMvc.get("/treatments/$id") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isNotFound() }
+        }
     }
 }

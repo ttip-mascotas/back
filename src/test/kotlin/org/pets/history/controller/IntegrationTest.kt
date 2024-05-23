@@ -1,32 +1,17 @@
 package org.pets.history.controller
 
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.util.TestPropertyValues
-import org.springframework.context.ApplicationContextInitializer
-import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 
-
-@SpringBootTest
-@ContextConfiguration(initializers = [IntegrationTest.Initializer::class])
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Testcontainers
 abstract class IntegrationTest {
     companion object {
+        @Container
+        @ServiceConnection
         val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16.2-alpine3.19")
-    }
-
-    internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
-        override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
-            postgresContainer.start()
-
-            TestPropertyValues.of(
-                "spring.datasource.url=${postgresContainer.jdbcUrl}",
-                "spring.datasource.username=${postgresContainer.username}",
-                "spring.datasource.password=${postgresContainer.password}",
-                "spring.datasource.driver-class-name=${postgresContainer.driverClassName}",
-            ).applyTo(configurableApplicationContext.environment)
-        }
     }
 }

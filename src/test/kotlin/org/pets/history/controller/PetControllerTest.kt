@@ -19,8 +19,6 @@ import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
 import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MockMvc
@@ -37,9 +35,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class PetControllerTest {
+class PetControllerTest : IntegrationTest() {
     private val mapper = ObjectMapper()
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -479,54 +475,52 @@ class PetControllerTest {
         confirmVerified(putObjectResult)
     }
 
-// TODO: re-habilitar luego de consultar si podemos usar testcontainers para éste o todos los tests porque H2
-//  no soporta TO_TSVECTOR ni WEBSEARCH_TO_TSQUERY de PostgreSQL
+    @Test
+    fun `Given a pet id and search criteria, return a single file that matches the criteria`() {
+        val pet = petRepository.save(anyPet())
 
-//    @Test
-//    fun `Given a pet id and search criteria, return a single file that matches the criteria`() {
-//        val pet = petRepository.save(anyPet())
-//
-//        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
-//        val fileBytes = Files.readAllBytes(file.toPath())
-//
-//        val multipartFile = MockMultipartFile(
-//            "analysis",
-//            file.name,
-//            MediaType.APPLICATION_PDF_VALUE,
-//            fileBytes
-//        )
-//        val bucket = "analyses"
-//        val filename = UUID.randomUUID().toString()
-//
-//        every { putObjectResult.bucket() } returns bucket
-//        every { putObjectResult.`object`() } returns "${pet.id}/$filename"
-//
-//        mockMvc.perform(
-//            multipart("/pets/${pet.id}/analyses")
-//                .file(multipartFile)
-//        )
-//            .andExpect(status().isCreated)
-//
-//        verify {
-//            minioClient.bucketExists(any())
-//            minioClient.makeBucket(any())
-//            minioClient.putObject(any())
-//            putObjectResult.bucket()
-//            putObjectResult.`object`()
-//        }
-//
-//        confirmVerified(minioClient)
-//        confirmVerified(putObjectResult)
-//
-//        mockMvc.perform(
-//            get("/pets/${pet.id}/analyses?q=dummy")
-//        )
-//            .andExpect(status().isOk)
-//            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//            .andExpect(jsonPath("$.id").isNumber)
-//            .andExpect(jsonPath("$.name").value(file.name))
-//            .andExpect(jsonPath("$.size").value(13264))
-//            .andExpect(jsonPath("$.createdAt").isNotEmpty)
-//    }
+        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
+        val fileBytes = Files.readAllBytes(file.toPath())
+
+        val multipartFile = MockMultipartFile(
+            "analysis",
+            file.name,
+            MediaType.APPLICATION_PDF_VALUE,
+            fileBytes
+        )
+        val bucket = "analyses"
+        val filename = UUID.randomUUID().toString()
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns "${pet.id}/$filename"
+
+        mockMvc.perform(
+            multipart("/pets/${pet.id}/analyses")
+                .file(multipartFile)
+        )
+            .andExpect(status().isCreated)
+
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+
+        mockMvc.perform(
+            get("/pets/${pet.id}/analyses?q=dummy")
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.results.length()").value(1))
+            .andExpect(jsonPath("$.results[0].id").isNumber)
+            .andExpect(jsonPath("$.results[0].name").value(file.name))
+            .andExpect(jsonPath("$.results[0].size").value(13264))
+            .andExpect(jsonPath("$.results[0].createdAt").isNotEmpty)
+    }
 
 }

@@ -14,11 +14,11 @@ CREATE TABLE IF NOT EXISTS pet
 CREATE TABLE IF NOT EXISTS medical_visit
 (
     pet_id       BIGINT,
-    id           BIGSERIAL    NOT NULL,
-    address      VARCHAR(256) NOT NULL,
-    datetime     TIMESTAMP    NOT NULL,
-    specialist   VARCHAR(128) NOT NULL,
-    observations VARCHAR(512) NOT NULL,
+    id           BIGSERIAL                   NOT NULL,
+    address      VARCHAR(256)                NOT NULL,
+    datetime     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    specialist   VARCHAR(128)                NOT NULL,
+    observations VARCHAR(512)                NOT NULL,
     CONSTRAINT fk_pet_id FOREIGN KEY (pet_id) REFERENCES pet (id),
     CONSTRAINT pk_medical_visit PRIMARY KEY (id)
 );
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS analysis
     size       BIGINT       NOT NULL,
     url        VARCHAR(256) NOT NULL,
     text       TEXT,
-    created_at TIMESTAMP,
+    created_at TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT fk_pet_id FOREIGN KEY (pet_id) REFERENCES pet (id),
     CONSTRAINT pk_analysis PRIMARY KEY (id)
 );
@@ -39,12 +39,12 @@ CREATE TABLE IF NOT EXISTS analysis
 CREATE TABLE IF NOT EXISTS treatment
 (
     pet_id          BIGINT,
-    id              BIGSERIAL    NOT NULL,
-    medicine        VARCHAR(128) NOT NULL,
-    datetime        TIMESTAMP    NOT NULL,
-    dose            VARCHAR(128) NOT NULL,
-    frequency       INTEGER      NOT NULL,
-    number_of_times INTEGER      NOT NULL,
+    id              BIGSERIAL                   NOT NULL,
+    medicine        VARCHAR(128)                NOT NULL,
+    datetime        TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    dose            VARCHAR(128)                NOT NULL,
+    frequency       INTEGER                     NOT NULL,
+    number_of_times INTEGER                     NOT NULL,
     CONSTRAINT fk_pet_id FOREIGN KEY (pet_id) REFERENCES pet (id),
     CONSTRAINT pk_treatment PRIMARY KEY (id)
 );
@@ -61,9 +61,9 @@ CREATE TABLE IF NOT EXISTS schedule_per_day
 CREATE TABLE IF NOT EXISTS dose_control
 (
     schedule_per_day_id BIGINT,
-    id                  BIGSERIAL NOT NULL,
-    time                TIMESTAMP NOT NULL,
-    supplied            BOOLEAN   NOT NULL,
+    id                  BIGSERIAL                   NOT NULL,
+    time                TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    supplied            BOOLEAN                     NOT NULL,
     CONSTRAINT fk_schedule_per_day_id FOREIGN KEY (schedule_per_day_id) REFERENCES schedule_per_day (id),
     CONSTRAINT pk_dose_control PRIMARY KEY (id)
 );

@@ -34,7 +34,6 @@ class PetController(
     private val petService: PetService,
     private val minioService: MinioService
 ) {
-    @GetMapping("")
     @Operation(
         summary = "Retrieves all pets",
         description = "Retrieves all registered pets",
@@ -53,7 +52,8 @@ class PetController(
             )
         ]
     )
-    @JsonView(View.Compact::class)
+    @GetMapping("")
+    @JsonView(View.CompactPet::class)
     fun getAllPets(): CollectionDTO<Pet> = CollectionDTO(petService.getAllPets())
 
     @Operation(
@@ -75,7 +75,7 @@ class PetController(
         ]
     )
     @GetMapping("/{id}")
-    @JsonView(View.Extended::class)
+    @JsonView(View.ExtendedPet::class)
     fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
 
     @Operation(
@@ -98,10 +98,9 @@ class PetController(
     )
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    @JsonView(View.Compact::class)
+    @JsonView(View.CompactPet::class)
     fun registerPet(@RequestBody @Valid pet: Pet): Pet = petService.registerPet(pet)
 
-    @GetMapping("/{petId}/medical-records")
     @Operation(
         summary = "Retrieves medical visits",
         description = "Retrieves all medical visits for a given pet id",
@@ -120,6 +119,7 @@ class PetController(
             )
         ]
     )
+    @GetMapping("/{petId}/medical-records")
     fun getMedicalVisitsForPetId(@PathVariable petId: Long): CollectionDTO<MedicalVisit> =
         CollectionDTO(petService.getMedicalVisits(petId))
 
@@ -149,8 +149,8 @@ class PetController(
     ): MedicalVisit = petService.registerMedicalVisit(petId, medicalVisitIn)
 
     @Operation(
-        summary = "Start a treatment",
-        description = "Start a treatment for a given pet id",
+        summary = "Starts a treatment",
+        description = "Starts a treatment for a given pet id",
     )
     @ApiResponses(
         value = [
@@ -168,11 +168,34 @@ class PetController(
     )
     @PostMapping("/{petId}/treatments")
     @ResponseStatus(HttpStatus.CREATED)
+    @JsonView(View.CompactTreatment::class)
     fun startTreatment(
         @PathVariable petId: Long,
         @RequestBody @Valid treatment: Treatment
     ): Treatment = petService.startTreatment(petId, treatment)
 
+    @Operation(
+        summary = "Uploads a profile picture",
+        description = "Uploads a profile picture for a given pet id",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.IMAGE_JPEG_VALUE,
+                        schema = Schema(implementation = FileDTO::class),
+                    ),
+                    Content(
+                        mediaType = MediaType.IMAGE_PNG_VALUE,
+                        schema = Schema(implementation = FileDTO::class),
+                    )
+                ]
+            )
+        ]
+    )
     @PostMapping(
         "/avatars",
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE]
@@ -182,6 +205,24 @@ class PetController(
         @RequestPart("avatar") avatar: MultipartFile
     ): FileDTO = FileDTO(minioService.uploadAvatar(avatar.inputStream, avatar.contentType!!))
 
+    @Operation(
+        summary = "Uploads an analysis file",
+        description = "Uploads an analysis file for a given pet id",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_PDF_VALUE,
+                        schema = Schema(implementation = Analysis::class),
+                    )
+                ]
+            )
+        ]
+    )
     @PostMapping(
         "/{petId}/analyses",
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_PDF_VALUE]
@@ -191,4 +232,27 @@ class PetController(
         @PathVariable petId: Long,
         @RequestPart("analysis") analysis: MultipartFile,
     ): Analysis = petService.attachAnalysis(petId, analysis)
+
+    @Operation(
+        summary = "Search pet analyses",
+        description = "Searches pet analyses",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = CollectionDTO::class),
+                    )
+                ]
+            )
+        ]
+    )
+    @GetMapping("/{id}/analyses")
+    @JsonView(View.ExtendedPet::class)
+    fun searchAnalyses(@PathVariable id: Long, @RequestParam(name = "q") query: String): CollectionDTO<Analysis> =
+        CollectionDTO(petService.searchAnalyses(id, query))
 }

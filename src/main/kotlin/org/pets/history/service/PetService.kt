@@ -75,4 +75,8 @@ class PetService(
         val pdfStripper = PDFTextStripper()
         return pdfStripper.getText(document)
     }
+
+    fun searchAnalyses(petId: Long, query: String): Iterable<Analysis> {
+        return analysisRepository.search(petId, query)
+    }
 }

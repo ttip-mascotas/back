@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 @Entity
 class MedicalVisit {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
     @Column(length = 256, nullable = false)

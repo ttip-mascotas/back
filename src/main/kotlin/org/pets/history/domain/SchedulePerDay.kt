@@ -7,7 +7,7 @@ import java.time.LocalDate
 @Entity
 class SchedulePerDay {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
     @Column(nullable = false)

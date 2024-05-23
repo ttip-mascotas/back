@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS medical_visit
     CONSTRAINT pk_medical_visit PRIMARY KEY (id)
 );
 
-CREATE TABLE analysis
+CREATE TABLE IF NOT EXISTS analysis
 (
     pet_id     BIGINT,
     id         BIGINT       NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS treatment
     CONSTRAINT pk_treatment PRIMARY KEY (id)
 );
 
-CREATE TABLE schedule_per_day
+CREATE TABLE IF NOT EXISTS schedule_per_day
 (
     treatment_id BIGINT,
     id           BIGINT NOT NULL,

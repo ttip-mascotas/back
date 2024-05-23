@@ -29,7 +29,6 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
-    implementation("org.apache.pdfbox:pdfbox:3.0.1")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
 
@@ -37,6 +36,7 @@ dependencies {
     runtimeOnly("org.flywaydb:flyway-database-postgresql:10.12.0")
 
     implementation("io.minio:minio:8.5.9")
+    implementation("org.apache.pdfbox:pdfbox:3.0.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(module = "mockito-core")
@@ -44,7 +44,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-    testImplementation("com.ninja-squad:springmockk")
+    testImplementation("com.ninja-squad:springmockk:4.0.2")
     testRuntimeOnly("com.h2database:h2")
 }
 

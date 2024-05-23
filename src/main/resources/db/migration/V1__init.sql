@@ -61,9 +61,9 @@ CREATE TABLE IF NOT EXISTS schedule_per_day
 CREATE TABLE IF NOT EXISTS dose_control
 (
     schedule_per_day_id BIGINT,
-    id                  BIGSERIAL                   NOT NULL,
-    time                TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    supplied            BOOLEAN                     NOT NULL,
+    id                  BIGSERIAL NOT NULL,
+    time                TIMESTAMP NOT NULL,
+    supplied            BOOLEAN   NOT NULL,
     CONSTRAINT fk_schedule_per_day_id FOREIGN KEY (schedule_per_day_id) REFERENCES schedule_per_day (id),
     CONSTRAINT pk_dose_control PRIMARY KEY (id)
 );

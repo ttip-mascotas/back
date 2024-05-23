@@ -25,7 +25,6 @@ spring:
   flyway:
     enabled: true
     create-schemas: true
-    out-of-order: true
     default-schema: public
 
   servlet:

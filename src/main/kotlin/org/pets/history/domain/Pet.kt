@@ -25,7 +25,7 @@ import kotlin.math.absoluteValue
 )
 class Pet {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
     @Column(length = 128, nullable = false)

@@ -20,12 +20,13 @@ import org.pets.history.domain.Treatment
 import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.multipart
+import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
@@ -36,13 +37,11 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-
-@SpringBootTest
 @AutoConfigureMockMvc
-class PetControllerTest {
-    private val mapper = ObjectMapper()
+class PetControllerTest : IntegrationTest() {
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val mapper = ObjectMapper()
     private lateinit var mockMvc: MockMvc
 
     @Autowired
@@ -51,11 +50,11 @@ class PetControllerTest {
     @MockkBean
     private lateinit var minioClient: MinioClient
 
-    @Autowired
-    private lateinit var petRepository: PetRepository
-
     @MockK
     private lateinit var putObjectResult: ObjectWriteResponse
+
+    @Autowired
+    private lateinit var petRepository: PetRepository
 
     @BeforeEach
     fun setUp() {
@@ -92,7 +91,7 @@ class PetControllerTest {
         }
     }
 
-    fun aTreatment(): Treatment {
+    fun anyTreatment(): Treatment {
         return Treatment().apply {
             medicine = "Tramadol"
             datetime = LocalDateTime.of(LocalDateTime.now().plusYears(1).year, 3, 1, 0, 0, 0)
@@ -107,23 +106,22 @@ class PetControllerTest {
         petRepository.save(anyPet())
         petRepository.save(anyPet())
 
-        mockMvc.perform(
-            get("/pets")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.results.length()").value(2))
-            .andExpect(jsonPath("$.results[0].id").isNumber)
-            .andExpect(jsonPath("$.results[0].name").value("Pippin"))
-            .andExpect(jsonPath("$.results[0].photo").isNotEmpty)
-            .andExpect(jsonPath("$.results[0].birthdate").value("2023-01-01"))
-            .andExpect(jsonPath("$.results[0].breed").value("San Bernardo"))
-            .andExpect(jsonPath("$.results[0].weight").value(2.toDouble()))
-            .andExpect(jsonPath("$.results[0].age").value("1"))
-            .andExpect(jsonPath("$.results[0].fur").value("Long"))
-            .andExpect(jsonPath("$.results[0].sex").value("FEMALE"))
+        mockMvc.get("/pets") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.results.length()") { value(2) }
+            jsonPath("$.results[0].id") { isNumber() }
+            jsonPath("$.results[0].name") { value("Pippin") }
+            jsonPath("$.results[0].photo") { isNotEmpty() }
+            jsonPath("$.results[0].birthdate") { value("2023-01-01") }
+            jsonPath("$.results[0].breed") { value("San Bernardo") }
+            jsonPath("$.results[0].weight") { value(2.toDouble()) }
+            jsonPath("$.results[0].age") { value("1") }
+            jsonPath("$.results[0].sex") { value("FEMALE") }
+        }
     }
 
     @Test
@@ -131,112 +129,107 @@ class PetControllerTest {
         val pet = petRepository.save(anyPet())
         val id = pet.id
 
-        mockMvc.perform(
-            get("/pets/$id")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.name").value("Pippin"))
-            .andExpect(jsonPath("$.photo").isNotEmpty)
-            .andExpect(jsonPath("$.birthdate").value("2023-01-01"))
-            .andExpect(jsonPath("$.breed").value("San Bernardo"))
-            .andExpect(jsonPath("$.weight").value(2.toDouble()))
-            .andExpect(jsonPath("$.age").value("1"))
-            .andExpect(jsonPath("$.fur").value("Long"))
-            .andExpect(jsonPath("$.sex").value("FEMALE"))
-            .andExpect(jsonPath("$.medicalVisits").isEmpty())
+        mockMvc.get("/pets/$id") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { isNumber() }
+            jsonPath("$.name") { value("Pippin") }
+            jsonPath("$.photo") { isNotEmpty() }
+            jsonPath("$.birthdate") { value("2023-01-01") }
+            jsonPath("$.breed") { value("San Bernardo") }
+            jsonPath("$.weight") { value(2.toDouble()) }
+            jsonPath("$.age") { value("1") }
+            jsonPath("$.fur") { value("Long") }
+            jsonPath("$.sex") { value("FEMALE") }
+            jsonPath("$.medicalVisits") { isEmpty() }
+        }
     }
 
     @Test
     fun `Given a pet id that does not exists, an error is returned`() {
         val id = 99
 
-        mockMvc.perform(
-            get("/pets/$id")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isNotFound)
+        mockMvc.get("/pets/$id") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isNotFound() }
+        }
     }
 
     @Test
     fun `Given the details of a pet, registers said pet and return it`() {
         val pet = anyPet()
-        val json = mapper.writeValueAsString(pet)
 
-        mockMvc.perform(
-            post("/pets")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.name").value(pet.name))
-            .andExpect(jsonPath("$.photo").value(pet.photo))
-            .andExpect(jsonPath("$.weight").value(pet.weight))
-            .andExpect(jsonPath("$.birthdate").value(pet.birthdate.format(dateFormatter)))
-            .andExpect(jsonPath("$.breed").value(pet.breed))
-            .andExpect(jsonPath("$.fur").value(pet.fur))
-            .andExpect(jsonPath("$.sex").value(pet.sex.toString()))
-            .andExpect(jsonPath("$.age").value(pet.age))
+        mockMvc.post("/pets") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(pet)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { isNumber() }
+            jsonPath("$.name") { value(pet.name) }
+            jsonPath("$.photo") { value(pet.photo) }
+            jsonPath("$.weight") { value(pet.weight) }
+            jsonPath("$.birthdate") { value(pet.birthdate.format(dateFormatter)) }
+            jsonPath("$.breed") { value(pet.breed) }
+            jsonPath("$.fur") { value(pet.fur) }
+            jsonPath("$.sex") { value(pet.sex.toString()) }
+            jsonPath("$.age") { value(pet.age) }
+        }
     }
 
     @Test
     fun `Given the details of a pet, when said details contain a negative weight, fail to register the pet and return an error`() {
         val pet = anyPet()
         pet.weight = -1.0
-        val json = mapper.writeValueAsString(pet)
 
-        mockMvc.perform(
-            post("/pets")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-        )
-            .andExpect(status().isBadRequest)
+        mockMvc.post("/pets") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(pet)
+        }.andExpect {
+            status { isBadRequest() }
+        }
     }
 
     @Test
     fun `Given a pet id that does exist and the details of a medical visit, registers said record and return it`() {
         val pet = petRepository.save(anyPet())
         val id = pet.id
-
         val medicalVisit = anyMedicalVisit()
-        val json = mapper.writeValueAsString(medicalVisit)
 
-        mockMvc.perform(
-            post("/pets/$id/medical-records")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.address").value(medicalVisit.address))
-            .andExpect(jsonPath("$.specialist").value(medicalVisit.specialist))
-            .andExpect(jsonPath("$.datetime").value(medicalVisit.datetime.format(datetimeFormatter)))
-            .andExpect(jsonPath("$.observations").value(medicalVisit.observations))
+        mockMvc.post("/pets/$id/medical-records") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(medicalVisit)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { isNumber() }
+            jsonPath("$.address") { value(medicalVisit.address) }
+            jsonPath("$.specialist") { value(medicalVisit.specialist) }
+            jsonPath("$.datetime") { value(medicalVisit.datetime.format(datetimeFormatter)) }
+            jsonPath("$.observations") { value(medicalVisit.observations) }
+        }
     }
 
     @Test
     fun `Given a pet id that does not exist and the details of a medical visit, fail to register said record and return an error`() {
         val id = 99
-
         val medicalVisit = anyMedicalVisit()
-        val json = mapper.writeValueAsString(medicalVisit)
 
-        mockMvc.perform(
-            post("/pets/$id/medical-records")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-        )
-            .andExpect(status().isNotFound)
+        mockMvc.post("/pets/$id/medical-records") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(medicalVisit)
+        }.andExpect {
+            status { isNotFound() }
+        }
     }
 
     @Test
@@ -246,64 +239,60 @@ class PetControllerTest {
         pet = petRepository.save(pet)
         val id = pet.id
 
-        mockMvc.perform(
-            get("/pets/$id/medical-records")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.results.length()").value(1))
-            .andExpect(jsonPath("$.results.[0].id").isNumber)
-            .andExpect(jsonPath("$.results.[0].address").value("Evergreen 123"))
-            .andExpect(jsonPath("$.results.[0].datetime").value("2024-03-28T12:00:00"))
-            .andExpect(jsonPath("$.results.[0].specialist").value("Lisa Simpson"))
-            .andExpect(jsonPath("$.results.[0].observations").value("Healthy"))
+        mockMvc.get("/pets/$id/medical-records") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.results.length()") { value(1) }
+            jsonPath("$.results.[0].id") { isNumber() }
+            jsonPath("$.results.[0].address") { value("Evergreen 123") }
+            jsonPath("$.results.[0].datetime") { value("2024-03-28T12:00:00") }
+            jsonPath("$.results.[0].specialist") { value("Lisa Simpson") }
+            jsonPath("$.results.[0].observations") { value("Healthy") }
+        }
     }
 
     @Test
     fun `Given a pet id that does exist and the details of a treatment, registers said record and return it`() {
         val pet = petRepository.save(anyPet())
         val id = pet.id
+        val treatment = anyTreatment()
 
-        val treatment = aTreatment()
-        val json = mapper.writeValueAsString(treatment)
-
-        mockMvc.perform(
-            post("/pets/$id/treatments")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.medicine").value(treatment.medicine))
-            .andExpect(jsonPath("$.dose").value(treatment.dose))
-            .andExpect(jsonPath("$.datetime").value(treatment.datetime.format(datetimeFormatter)))
-            .andExpect(jsonPath("$.frequency").value(treatment.frequency))
-            .andExpect(jsonPath("$.numberOfTimes").value(treatment.numberOfTimes))
+        mockMvc.post("/pets/$id/treatments") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(treatment)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { isNumber() }
+            jsonPath("$.medicine") { value(treatment.medicine) }
+            jsonPath("$.dose") { value(treatment.dose) }
+            jsonPath("$.datetime") { value(treatment.datetime.format(datetimeFormatter)) }
+            jsonPath("$.frequency") { value(treatment.frequency) }
+            jsonPath("$.numberOfTimes") { value(treatment.numberOfTimes) }
+        }
     }
 
     @Test
     fun `Given a pet id that does not exist and the details of a treatment, fail to register said record and return an error`() {
         val id = 99
+        val treatment = anyTreatment()
 
-        val aTreatment = aTreatment()
-        val json = mapper.writeValueAsString(aTreatment)
-
-        mockMvc.perform(
-            post("/pets/$id/treatments")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-        )
-            .andExpect(status().isNotFound)
+        mockMvc.post("/pets/$id/treatments") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(treatment)
+        }.andExpect {
+            status { isNotFound() }
+        }
     }
 
     @Test
     fun `Given an avatar, uploads it successfully`() {
-        val file = MockMultipartFile(
+        val imageFile = MockMultipartFile(
             "avatar",
             "avatar.jpg",
             MediaType.IMAGE_JPEG_VALUE,
@@ -317,13 +306,13 @@ class PetControllerTest {
 
         val avatarURL = "http://127.0.0.1:9000/$bucket/$filename"
 
-        mockMvc.perform(
-            multipart("/pets/avatars")
-                .file(file)
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.url").value(avatarURL))
+        mockMvc.multipart("/pets/avatars") {
+            file(imageFile)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.url") { value(avatarURL) }
+        }
 
         verify {
             minioClient.bucketExists(any())
@@ -339,19 +328,19 @@ class PetControllerTest {
 
     @Test
     fun `Given an avatar that is not an image, the upload fails`() {
-        val file = MockMultipartFile(
+        val imageFile = MockMultipartFile(
             "avatar",
             "avatar.xml",
             MediaType.APPLICATION_XML_VALUE,
             "an_xml".toByteArray()
         )
 
-        mockMvc.perform(
-            multipart("/pets/avatars")
-                .file(file)
-        ).andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isBadRequest)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        mockMvc.multipart("/pets/avatars") {
+            file(imageFile)
+        }.andExpect {
+            status { isBadRequest() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+        }
 
         verify(exactly = 0) {
             minioClient.bucketExists(any())
@@ -395,6 +384,17 @@ class PetControllerTest {
             .andExpect(jsonPath("$.size").value(13264))
             .andExpect(jsonPath("$.createdAt").isNotEmpty)
 
+        mockMvc.multipart("/pets/${pet.id}/analyses") {
+            file(multipartFile)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { isNumber() }
+            jsonPath("$.name") { value(file.name) }
+            jsonPath("$.size") { value(13264) }
+            jsonPath("$.createdAt") { isNotEmpty() }
+        }
+
         verify {
             minioClient.bucketExists(any())
             minioClient.makeBucket(any())
@@ -426,16 +426,16 @@ class PetControllerTest {
         every { putObjectResult.bucket() } returns bucket
         every { putObjectResult.`object`() } returns "${pet.id}/$filename"
 
-        mockMvc.perform(
-            multipart("/pets/${pet.id}/analyses")
-                .file(multipartFile)
-        ).andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.name").value("análisis.pdf"))
-            .andExpect(jsonPath("$.size").value(13264))
-            .andExpect(jsonPath("$.createdAt").isNotEmpty)
+        mockMvc.multipart("/pets/${pet.id}/analyses") {
+            file(multipartFile)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { isNumber() }
+            jsonPath("$.name") { value("análisis.pdf") }
+            jsonPath("$.size") { value(13264) }
+            jsonPath("$.createdAt") { isNotEmpty() }
+        }
 
         verify {
             minioClient.bucketExists(any())
@@ -453,19 +453,19 @@ class PetControllerTest {
     fun `Given a pet id and an analysis file that is not a PDF, the upload fails`() {
         val pet = petRepository.save(anyPet())
 
-        val file = MockMultipartFile(
+        val multipartFile = MockMultipartFile(
             "analysis",
             "pet_analysis.xml",
             MediaType.APPLICATION_XML_VALUE,
             "an_xml".toByteArray()
         )
 
-        mockMvc.perform(
-            multipart("/pets/${pet.id}/analyses")
-                .file(file)
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        mockMvc.multipart("/pets/${pet.id}/analyses") {
+            file(multipartFile)
+        }.andExpect {
+            status { isBadRequest() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+        }
 
         verify(exactly = 0) {
             minioClient.bucketExists(any())
@@ -479,54 +479,55 @@ class PetControllerTest {
         confirmVerified(putObjectResult)
     }
 
-// TODO: re-habilitar luego de consultar si podemos usar testcontainers para éste o todos los tests porque H2
-//  no soporta TO_TSVECTOR ni WEBSEARCH_TO_TSQUERY de PostgreSQL
+    @Test
+    fun `Given a pet id and search criteria, return a single file that matches the criteria`() {
+        val pet = petRepository.save(anyPet())
 
-//    @Test
-//    fun `Given a pet id and search criteria, return a single file that matches the criteria`() {
-//        val pet = petRepository.save(anyPet())
-//
-//        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
-//        val fileBytes = Files.readAllBytes(file.toPath())
-//
-//        val multipartFile = MockMultipartFile(
-//            "analysis",
-//            file.name,
-//            MediaType.APPLICATION_PDF_VALUE,
-//            fileBytes
-//        )
-//        val bucket = "analyses"
-//        val filename = UUID.randomUUID().toString()
-//
-//        every { putObjectResult.bucket() } returns bucket
-//        every { putObjectResult.`object`() } returns "${pet.id}/$filename"
-//
-//        mockMvc.perform(
-//            multipart("/pets/${pet.id}/analyses")
-//                .file(multipartFile)
-//        )
-//            .andExpect(status().isCreated)
-//
-//        verify {
-//            minioClient.bucketExists(any())
-//            minioClient.makeBucket(any())
-//            minioClient.putObject(any())
-//            putObjectResult.bucket()
-//            putObjectResult.`object`()
-//        }
-//
-//        confirmVerified(minioClient)
-//        confirmVerified(putObjectResult)
-//
-//        mockMvc.perform(
-//            get("/pets/${pet.id}/analyses?q=dummy")
-//        )
-//            .andExpect(status().isOk)
-//            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//            .andExpect(jsonPath("$.id").isNumber)
-//            .andExpect(jsonPath("$.name").value(file.name))
-//            .andExpect(jsonPath("$.size").value(13264))
-//            .andExpect(jsonPath("$.createdAt").isNotEmpty)
-//    }
+        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
+        val fileBytes = Files.readAllBytes(file.toPath())
+
+        val multipartFile = MockMultipartFile(
+            "analysis",
+            file.name,
+            MediaType.APPLICATION_PDF_VALUE,
+            fileBytes
+        )
+        val bucket = "analyses"
+        val filename = UUID.randomUUID().toString()
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns "${pet.id}/$filename"
+
+        mockMvc.multipart("/pets/${pet.id}/analyses") {
+            file(multipartFile)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+        }
+
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+
+        mockMvc.get("/pets/${pet.id}/analyses?q=dummy") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.results.length()") { value(1) }
+            jsonPath("$.results[0].id") { isNumber() }
+            jsonPath("$.results[0].name") { value(file.name) }
+            jsonPath("$.results[0].size") { value(13264) }
+            jsonPath("$.results[0].createdAt") { isNotEmpty() }
+        }
+    }
 
 }

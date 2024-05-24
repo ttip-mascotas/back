@@ -76,7 +76,5 @@ class PetService(
         return pdfStripper.getText(document)
     }
 
-    fun searchAnalyses(petId: Long, query: String): Iterable<Analysis> {
-        return analysisRepository.search(petId, query)
-    }
+    fun searchAnalyses(petId: Long, query: String): Iterable<Analysis> = analysisRepository.search(petId, query)
 }

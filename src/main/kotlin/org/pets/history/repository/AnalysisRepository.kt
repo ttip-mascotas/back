@@ -8,9 +8,9 @@ import org.springframework.data.repository.query.Param
 interface AnalysisRepository : CrudRepository<Analysis, Long> {
     @Query(
         value = """
-            SELECT * 
-            FROM Analysis a 
-            WHERE a.pet_id = :petId 
+            SELECT *
+            FROM Analysis a
+            WHERE a.pet_id = :petId
             AND TO_TSVECTOR('spanish', a.name || ' ' || a.text) @@ WEBSEARCH_TO_TSQUERY('spanish', :query)
         """,
         nativeQuery = true

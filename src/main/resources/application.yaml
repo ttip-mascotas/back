@@ -17,10 +17,15 @@ spring:
     open-in-view: false
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
+
+  flyway:
+    enabled: true
+    create-schemas: true
+    default-schema: public
 
   servlet:
     multipart:

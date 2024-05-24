@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @Entity
 class DoseControl {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
     @Column(nullable = false)

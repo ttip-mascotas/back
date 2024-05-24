@@ -31,7 +31,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      # - ./scripts/init_db.sh:/docker-entrypoint-initdb.d/01_init_db.sh
     healthcheck:
       test:
         [

@@ -20,18 +20,15 @@ import org.pets.history.domain.Treatment
 import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.core.io.ResourceLoader
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
-import java.io.File
-import java.nio.file.Files
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -55,6 +52,9 @@ class PetControllerTest : IntegrationTest() {
 
     @Autowired
     private lateinit var petRepository: PetRepository
+
+    @Autowired
+    private lateinit var resourceLoader: ResourceLoader
 
     @BeforeEach
     fun setUp() {
@@ -357,15 +357,13 @@ class PetControllerTest : IntegrationTest() {
     @Test
     fun `Given a pet id and an analysis file, uploads it successfully`() {
         val pet = petRepository.save(anyPet())
-
-        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
-        val fileBytes = Files.readAllBytes(file.toPath())
+        val resource = resourceLoader.getResource("classpath:test-data/dummy.pdf")
 
         val multipartFile = MockMultipartFile(
             "analysis",
-            file.name,
+            resource.filename,
             MediaType.APPLICATION_PDF_VALUE,
-            fileBytes
+            resource.inputStream.readAllBytes()
         )
         val bucket = "analyses"
         val filename = UUID.randomUUID().toString()
@@ -373,24 +371,13 @@ class PetControllerTest : IntegrationTest() {
         every { putObjectResult.bucket() } returns bucket
         every { putObjectResult.`object`() } returns "${pet.id}/$filename"
 
-        mockMvc.perform(
-            multipart("/pets/${pet.id}/analyses")
-                .file(multipartFile)
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.name").value(file.name))
-            .andExpect(jsonPath("$.size").value(13264))
-            .andExpect(jsonPath("$.createdAt").isNotEmpty)
-
         mockMvc.multipart("/pets/${pet.id}/analyses") {
             file(multipartFile)
         }.andExpect {
             status { isCreated() }
             content { contentType(MediaType.APPLICATION_JSON) }
             jsonPath("$.id") { isNumber() }
-            jsonPath("$.name") { value(file.name) }
+            jsonPath("$.name") { value(resource.filename) }
             jsonPath("$.size") { value(13264) }
             jsonPath("$.createdAt") { isNotEmpty() }
         }
@@ -410,15 +397,13 @@ class PetControllerTest : IntegrationTest() {
     @Test
     fun `Given a pet id and an analysis file, when the analysis file has no original file name, uploads it successfully with a default name`() {
         val pet = petRepository.save(anyPet())
-
-        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
-        val fileBytes = Files.readAllBytes(file.toPath())
+        val resource = resourceLoader.getResource("classpath:test-data/dummy.pdf")
 
         val multipartFile = MockMultipartFile(
             "analysis",
             null,
             MediaType.APPLICATION_PDF_VALUE,
-            fileBytes
+            resource.inputStream.readAllBytes()
         )
         val bucket = "analyses"
         val filename = UUID.randomUUID().toString()
@@ -482,15 +467,13 @@ class PetControllerTest : IntegrationTest() {
     @Test
     fun `Given a pet id and search criteria, return a single file that matches the criteria`() {
         val pet = petRepository.save(anyPet())
-
-        val file = File("src/test/kotlin/org/pets/history/controller/dummy.pdf")
-        val fileBytes = Files.readAllBytes(file.toPath())
+        val resource = resourceLoader.getResource("classpath:test-data/dummy.pdf")
 
         val multipartFile = MockMultipartFile(
             "analysis",
-            file.name,
+            resource.filename,
             MediaType.APPLICATION_PDF_VALUE,
-            fileBytes
+            resource.inputStream.readAllBytes()
         )
         val bucket = "analyses"
         val filename = UUID.randomUUID().toString()
@@ -524,7 +507,7 @@ class PetControllerTest : IntegrationTest() {
             content { contentType(MediaType.APPLICATION_JSON) }
             jsonPath("$.results.length()") { value(1) }
             jsonPath("$.results[0].id") { isNumber() }
-            jsonPath("$.results[0].name") { value(file.name) }
+            jsonPath("$.results[0].name") { value(resource.filename) }
             jsonPath("$.results[0].size") { value(13264) }
             jsonPath("$.results[0].createdAt") { isNotEmpty() }
         }

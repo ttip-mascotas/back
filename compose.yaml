@@ -74,10 +74,8 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add minio ${MINIO_HOST} ${MINIO_USERNAME} ${MINIO_PASSWORD};
-      /usr/bin/mc rm -r --force minio/public/;
       /usr/bin/mc mb minio/public;
       /usr/bin/mc anonymous set download minio/public;
-      /usr/bin/mc rm -r --force minio/analyses/;
       /usr/bin/mc mb minio/analyses;
       /usr/bin/mc anonymous set download minio/analyses;
       exit 0;

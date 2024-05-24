@@ -7,7 +7,7 @@ import java.util.*
 
 interface TreatmentRepository : CrudRepository<Treatment, Long> {
     @EntityGraph(
-        attributePaths = ["schedulesPerDay", "schedulesPerDay.doseControls"],
+        attributePaths = ["logs"],
         type = EntityGraph.EntityGraphType.FETCH,
     )
     fun findWithAllRelatedById(petId: Long): Optional<Treatment>

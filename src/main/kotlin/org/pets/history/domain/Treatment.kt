@@ -7,9 +7,7 @@ import jakarta.validation.constraints.FutureOrPresent
 import jakarta.validation.constraints.NotEmpty
 import org.pets.history.serializer.View
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 
 @Entity
@@ -41,50 +39,20 @@ class Treatment {
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "treatment_id")
-    @OrderBy(value = "date ASC")
+    @OrderBy(value = "datetime ASC")
     @JsonView(View.ExtendedTreatment::class)
-    var schedulesPerDay: MutableSet<SchedulePerDay> = mutableSetOf()
+    var logs: MutableSet<TreatmentLog> = mutableSetOf()
 
     fun start() {
-        this.schedulesPerDay = schedulesPerDays(organizeByDate())
+        logs = generateTreatmentLogs()
     }
 
-    private fun organizeByDate(): HashMap<String, MutableSet<LocalDateTime>> {
-        val schedule: HashMap<String, MutableSet<LocalDateTime>> = hashMapOf()
-        var lastDate: LocalDateTime = datetime
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-        for (number in 1..numberOfTimes) {
-            addDateTimeByDate(formatter, lastDate, schedule)
-            lastDate = lastDate.plusHours(frequency.toLong())
-        }
-
-        return schedule
-    }
-
-    private fun addDateTimeByDate(
-        formatter: DateTimeFormatter,
-        lastDate: LocalDateTime,
-        list: HashMap<String, MutableSet<LocalDateTime>>
-    ) {
-        val key = formatter.format(lastDate)
-        if (list.containsKey(key)) {
-            list[key]?.add(lastDate)
-        } else {
-            list[key] = mutableSetOf(lastDate)
-        }
-    }
-
-    private fun schedulesPerDays(dates: HashMap<String, MutableSet<LocalDateTime>>) =
-        dates.keys.map {
-            SchedulePerDay().apply {
-                date = LocalDate.parse(it)
-                doseControls = dates[it]?.map {
-                    DoseControl().apply {
-                        time = it
-                        supplied = false
-                    }
-                }?.toMutableSet() ?: mutableSetOf()
+    private fun generateTreatmentLogs(): MutableSet<TreatmentLog> {
+        val logs = (0..<numberOfTimes).map {
+            TreatmentLog().apply {
+                datetime = this@Treatment.datetime.plusHours(it * frequency.toLong())
             }
         }.toMutableSet()
+        return logs
+    }
 }

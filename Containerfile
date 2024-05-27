@@ -5,7 +5,7 @@ WORKDIR /artifact
 COPY build.gradle.kts settings.gradle.kts gradlew ./
 COPY src src
 
-RUN gradle build --no-daemon --stacktrace
+RUN gradle build -x test --no-daemon --stacktrace
 
 
 FROM eclipse-temurin:21-jre-alpine

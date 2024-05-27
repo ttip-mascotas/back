@@ -23,7 +23,7 @@ class TreatmentControllerTest : IntegrationTest() {
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     private lateinit var mockMvc: MockMvc
     private lateinit var treatmentWithId: Treatment
-    private lateinit var treatmentWithCalendar: Treatment
+    private lateinit var treatmentWithLogs: Treatment
 
     @Autowired
     private lateinit var context: WebApplicationContext
@@ -38,11 +38,11 @@ class TreatmentControllerTest : IntegrationTest() {
     fun setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
 
-        val aPet = anyPet()
-        treatmentWithCalendar = anyTreatment()
-        aPet.startTreatment(treatmentWithCalendar)
-        petRepository.save(aPet)
-        treatmentWithId = treatmentRepository.save(treatmentWithCalendar)
+        val pet = anyPet()
+        treatmentWithLogs = anyTreatment()
+        pet.startTreatment(treatmentWithLogs)
+        petRepository.save(pet)
+        treatmentWithId = treatmentRepository.save(treatmentWithLogs)
     }
 
     @AfterEach
@@ -86,7 +86,7 @@ class TreatmentControllerTest : IntegrationTest() {
             jsonPath("$.datetime") { value(treatmentWithId.datetime.format(datetimeFormatter)) }
             jsonPath("$.frequency") { value(treatmentWithId.frequency) }
             jsonPath("$.numberOfTimes") { value(treatmentWithId.numberOfTimes) }
-            jsonPath("$.schedulesPerDay") { isNotEmpty() }
+            jsonPath("$.logs.length()") { value(treatmentWithId.numberOfTimes) }
         }
     }
 

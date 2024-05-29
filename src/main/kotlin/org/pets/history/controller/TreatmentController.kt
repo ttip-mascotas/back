@@ -7,7 +7,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.pets.history.domain.Treatment
+import org.pets.history.domain.TreatmentLog
+import org.pets.history.serializer.TreatmentLogUpdateDTO
 import org.pets.history.serializer.View
 import org.pets.history.service.TreatmentService
 import org.springframework.http.MediaType
@@ -43,4 +46,30 @@ class TreatmentController(
     @GetMapping("/{id}")
     @JsonView(View.ExtendedTreatment::class)
     fun getTreatment(@PathVariable id: Long): Treatment = treatmentService.getTreatment(id)
+
+    @Operation(
+        summary = "Update a treatment log",
+        description = "Update a treatment log by id",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = TreatmentLog::class),
+                    )
+                ]
+            )
+        ]
+    )
+    @PutMapping("/{treatmentId}/log/{treatmentLogId}")
+    fun updateTreatmentLog(
+        @PathVariable treatmentId: Long,
+        @PathVariable treatmentLogId: Long,
+        @RequestBody @Valid treatmentLogUpdateDTO: TreatmentLogUpdateDTO
+    ): TreatmentLog =
+        treatmentService.updateTreatmentLog(treatmentLogId, treatmentLogId, treatmentLogUpdateDTO)
 }

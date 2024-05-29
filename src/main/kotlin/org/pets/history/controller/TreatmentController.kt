@@ -65,7 +65,7 @@ class TreatmentController(
             )
         ]
     )
-    @PutMapping("/{treatmentId}/log/{treatmentLogId}")
+    @PutMapping("/{treatmentId}/logs/{treatmentLogId}")
     fun updateTreatmentLog(
         @PathVariable treatmentId: Long,
         @PathVariable treatmentLogId: Long,

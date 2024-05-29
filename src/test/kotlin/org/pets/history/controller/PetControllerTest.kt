@@ -58,9 +58,9 @@ class PetControllerTest : IntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
         mapper.registerModule(JavaTimeModule())
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
         every { minioClient.bucketExists(any()) } returns false
         justRun { minioClient.makeBucket(any()) }
         every { minioClient.putObject(any()) } returns putObjectResult

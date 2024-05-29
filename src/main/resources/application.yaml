@@ -35,6 +35,8 @@ spring:
   jackson:
     mapper:
       default-view-inclusion: true
+    deserialization:
+      fail-on-unknown-properties: true
 
 server:
   address: 0.0.0.0

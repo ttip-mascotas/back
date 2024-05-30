@@ -22,7 +22,6 @@ class Analysis {
 
     @Column(length = 256, nullable = false)
     @NotEmpty(message = "Es necesario que introduzcas una ruta de archivo")
-    @JsonIgnore
     var url: String = ""
 
     @Column(columnDefinition = "TEXT")

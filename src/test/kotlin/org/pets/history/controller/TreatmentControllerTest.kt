@@ -125,4 +125,19 @@ class TreatmentControllerTest : IntegrationTest() {
             jsonPath("$.datetime") { value(treatmentLog.datetime.format(datetimeFormatter)) }
         }
     }
+
+    @Test
+    fun `Given a treatment id that do exist, a treatment log id that does not exist and a payload, return an error`() {
+        val treatmentLogId = 99
+        val treatmentLogUpdateDTO = TreatmentLogUpdateDTO(administered = true)
+
+        mockMvc.put("/treatments/${treatment.id}/logs/$treatmentLogId") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(treatmentLogUpdateDTO)
+        }.andExpect {
+            status { isNotFound() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+        }
+    }
 }

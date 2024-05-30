@@ -71,5 +71,5 @@ class TreatmentController(
         @PathVariable treatmentLogId: Long,
         @RequestBody @Valid treatmentLogUpdateDTO: TreatmentLogUpdateDTO
     ): TreatmentLog =
-        treatmentService.updateTreatmentLog(treatmentLogId, treatmentLogId, treatmentLogUpdateDTO)
+        treatmentService.updateTreatmentLog(treatmentId, treatmentLogId, treatmentLogUpdateDTO)
 }

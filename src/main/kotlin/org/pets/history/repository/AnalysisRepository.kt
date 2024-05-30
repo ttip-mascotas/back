@@ -9,7 +9,7 @@ interface AnalysisRepository : CrudRepository<Analysis, Long> {
     @Query(
         value = """
             SELECT *
-            FROM Analysis a
+            FROM analysis a
             WHERE a.pet_id = :petId
             AND TO_TSVECTOR('spanish', a.name || ' ' || a.text) @@ WEBSEARCH_TO_TSQUERY('spanish', :query)
         """,

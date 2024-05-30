@@ -1,5 +1,8 @@
 package org.pets.history.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -7,11 +10,13 @@ import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
 import org.pets.history.repository.PetRepository
 import org.pets.history.repository.TreatmentRepository
+import org.pets.history.serializer.TreatmentLogUpdateDTO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.put
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import java.time.LocalDate
@@ -21,9 +26,9 @@ import java.time.format.DateTimeFormatter
 @AutoConfigureMockMvc
 class TreatmentControllerTest : IntegrationTest() {
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    private val mapper = ObjectMapper()
     private lateinit var mockMvc: MockMvc
-    private lateinit var treatmentWithId: Treatment
-    private lateinit var treatmentWithLogs: Treatment
+    private lateinit var treatment: Treatment
 
     @Autowired
     private lateinit var context: WebApplicationContext
@@ -36,13 +41,16 @@ class TreatmentControllerTest : IntegrationTest() {
 
     @BeforeEach
     fun setUp() {
+        mapper.registerModule(JavaTimeModule())
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
 
+        treatment = anyTreatment()
         val pet = anyPet()
-        treatmentWithLogs = anyTreatment()
-        pet.startTreatment(treatmentWithLogs)
+        pet.startTreatment(treatment)
         petRepository.save(pet)
-        treatmentWithId = treatmentRepository.save(treatmentWithLogs)
+        treatmentRepository.save(treatment)
+        println("h")
     }
 
     @AfterEach
@@ -73,20 +81,18 @@ class TreatmentControllerTest : IntegrationTest() {
 
     @Test
     fun `Given a treatment id that does exist, obtain the treatment with his calendar`() {
-        val id = treatmentWithId.id
-
-        mockMvc.get("/treatments/$id") {
+        mockMvc.get("/treatments/${treatment.id}") {
             accept = MediaType.APPLICATION_JSON
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isOk() }
             content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$.medicine") { value(treatmentWithId.medicine) }
-            jsonPath("$.dose") { value(treatmentWithId.dose) }
-            jsonPath("$.datetime") { value(treatmentWithId.datetime.format(datetimeFormatter)) }
-            jsonPath("$.frequency") { value(treatmentWithId.frequency) }
-            jsonPath("$.numberOfTimes") { value(treatmentWithId.numberOfTimes) }
-            jsonPath("$.logs.length()") { value(treatmentWithId.numberOfTimes) }
+            jsonPath("$.medicine") { value(treatment.medicine) }
+            jsonPath("$.dose") { value(treatment.dose) }
+            jsonPath("$.datetime") { value(treatment.datetime.format(datetimeFormatter)) }
+            jsonPath("$.frequency") { value(treatment.frequency) }
+            jsonPath("$.numberOfTimes") { value(treatment.numberOfTimes) }
+            jsonPath("$.logs.length()") { value(treatment.numberOfTimes) }
         }
     }
 
@@ -99,6 +105,39 @@ class TreatmentControllerTest : IntegrationTest() {
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `Given a treatment id, a treatment log id that do exist and a payload, update the log with the values provided by the payload`() {
+        val treatmentLog = treatment.logs.first()
+        val treatmentLogUpdateDTO = TreatmentLogUpdateDTO(administered = true)
+
+        mockMvc.put("/treatments/${treatment.id}/logs/${treatmentLog.id}") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(treatmentLogUpdateDTO)
+        }.andExpect {
+            status { isOk() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { value(treatmentLog.id) }
+            jsonPath("$.administered") { value(!treatmentLog.administered) }
+            jsonPath("$.datetime") { value(treatmentLog.datetime.format(datetimeFormatter)) }
+        }
+    }
+
+    @Test
+    fun `Given a treatment id that do exist, a treatment log id that does not exist and a payload, return an error`() {
+        val treatmentLogId = 99
+        val treatmentLogUpdateDTO = TreatmentLogUpdateDTO(administered = true)
+
+        mockMvc.put("/treatments/${treatment.id}/logs/$treatmentLogId") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(treatmentLogUpdateDTO)
+        }.andExpect {
+            status { isNotFound() }
+            content { contentType(MediaType.APPLICATION_JSON) }
         }
     }
 }

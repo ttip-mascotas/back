@@ -28,8 +28,7 @@ class TreatmentControllerTest : IntegrationTest() {
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     private val mapper = ObjectMapper()
     private lateinit var mockMvc: MockMvc
-    private lateinit var treatmentWithId: Treatment
-    private lateinit var treatmentWithLogs: Treatment
+    private lateinit var treatment: Treatment
 
     @Autowired
     private lateinit var context: WebApplicationContext
@@ -46,11 +45,12 @@ class TreatmentControllerTest : IntegrationTest() {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
 
+        treatment = anyTreatment()
         val pet = anyPet()
-        val treatment = anyTreatment()
         pet.startTreatment(treatment)
         petRepository.save(pet)
-        treatmentWithLogs = treatmentRepository.save(treatment)
+        treatmentRepository.save(treatment)
+        println("h")
     }
 
     @AfterEach
@@ -81,18 +81,18 @@ class TreatmentControllerTest : IntegrationTest() {
 
     @Test
     fun `Given a treatment id that does exist, obtain the treatment with his calendar`() {
-        mockMvc.get("/treatments/${treatmentWithLogs.id}") {
+        mockMvc.get("/treatments/${treatment.id}") {
             accept = MediaType.APPLICATION_JSON
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isOk() }
             content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$.medicine") { value(treatmentWithId.medicine) }
-            jsonPath("$.dose") { value(treatmentWithId.dose) }
-            jsonPath("$.datetime") { value(treatmentWithId.datetime.format(datetimeFormatter)) }
-            jsonPath("$.frequency") { value(treatmentWithId.frequency) }
-            jsonPath("$.numberOfTimes") { value(treatmentWithId.numberOfTimes) }
-            jsonPath("$.logs.length()") { value(treatmentWithId.numberOfTimes) }
+            jsonPath("$.medicine") { value(treatment.medicine) }
+            jsonPath("$.dose") { value(treatment.dose) }
+            jsonPath("$.datetime") { value(treatment.datetime.format(datetimeFormatter)) }
+            jsonPath("$.frequency") { value(treatment.frequency) }
+            jsonPath("$.numberOfTimes") { value(treatment.numberOfTimes) }
+            jsonPath("$.logs.length()") { value(treatment.numberOfTimes) }
         }
     }
 
@@ -110,19 +110,19 @@ class TreatmentControllerTest : IntegrationTest() {
 
     @Test
     fun `Given a treatment id, a treatment log id that do exist and a payload, update the log with the values provided by the payload`() {
-        val log = treatmentWithLogs.logs.first()
+        val treatmentLog = treatment.logs.first()
         val treatmentLogUpdateDTO = TreatmentLogUpdateDTO(administered = true)
 
-        mockMvc.put("/treatments/${treatmentWithLogs.id}/logs/${log.id}") {
+        mockMvc.put("/treatments/${treatment.id}/logs/${treatmentLog.id}") {
             accept = MediaType.APPLICATION_JSON
             contentType = MediaType.APPLICATION_JSON
             content = mapper.writeValueAsString(treatmentLogUpdateDTO)
         }.andExpect {
             status { isOk() }
             content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$.id") { value(log.id) }
-            jsonPath("$.administered") { value(!log.administered) }
-            jsonPath("$.datetime") { value(log.datetime.format(datetimeFormatter)) }
+            jsonPath("$.id") { value(treatmentLog.id) }
+            jsonPath("$.administered") { value(!treatmentLog.administered) }
+            jsonPath("$.datetime") { value(treatmentLog.datetime.format(datetimeFormatter)) }
         }
     }
 }

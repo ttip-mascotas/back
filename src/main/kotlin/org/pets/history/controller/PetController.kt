@@ -168,7 +168,7 @@ class PetController(
     )
     @PostMapping("/{petId}/treatments")
     @ResponseStatus(HttpStatus.CREATED)
-    @JsonView(View.CompactTreatment::class)
+    @JsonView(View.ExtendedTreatment::class)
     fun startTreatment(
         @PathVariable petId: Long,
         @RequestBody @Valid treatment: Treatment

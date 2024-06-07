@@ -77,8 +77,8 @@ class TreatmentController(
     ): TreatmentLog =
         treatmentService.updateTreatmentLog(treatmentId, treatmentLogId, treatmentLogUpdateDTO)
 
-    @MessageMapping("/{treatmentId}/logs/{treatmentLogId}")
-    @SendTo("/topic/{treatmentId}/logs/{treatmentLogId}")
+    @MessageMapping("/treatments/{treatmentId}/logs/{treatmentLogId}")
+    @SendTo("/topic/treatments/{treatmentId}/logs/{treatmentLogId}")
     fun updateTreatmentLogWS(
         @DestinationVariable treatmentId: Long,
         @DestinationVariable treatmentLogId: Long,

@@ -14,6 +14,10 @@ import org.pets.history.serializer.TreatmentLogUpdateDTO
 import org.pets.history.serializer.View
 import org.pets.history.service.TreatmentService
 import org.springframework.http.MediaType
+import org.springframework.messaging.handler.annotation.DestinationVariable
+import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.handler.annotation.Payload
+import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -70,6 +74,15 @@ class TreatmentController(
         @PathVariable treatmentId: Long,
         @PathVariable treatmentLogId: Long,
         @RequestBody @Valid treatmentLogUpdateDTO: TreatmentLogUpdateDTO
+    ): TreatmentLog =
+        treatmentService.updateTreatmentLog(treatmentId, treatmentLogId, treatmentLogUpdateDTO)
+
+    @MessageMapping("/{treatmentId}/logs/{treatmentLogId}")
+    @SendTo("/topic/{treatmentId}/logs/{treatmentLogId}")
+    fun updateTreatmentLogWS(
+        @DestinationVariable treatmentId: Long,
+        @DestinationVariable treatmentLogId: Long,
+        @Payload @Valid treatmentLogUpdateDTO: TreatmentLogUpdateDTO
     ): TreatmentLog =
         treatmentService.updateTreatmentLog(treatmentId, treatmentLogId, treatmentLogUpdateDTO)
 }

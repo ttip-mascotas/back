@@ -20,6 +20,7 @@ class TreatmentService(
         }
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     fun updateTreatmentLog(
         treatmentId: Long,
         treatmentLogId: Long,

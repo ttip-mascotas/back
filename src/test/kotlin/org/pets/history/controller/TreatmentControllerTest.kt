@@ -50,7 +50,6 @@ class TreatmentControllerTest : IntegrationTest() {
         pet.startTreatment(treatment)
         petRepository.save(pet)
         treatmentRepository.save(treatment)
-        println("h")
     }
 
     @AfterEach

@@ -24,14 +24,14 @@ import java.util.*
 
 @SpringBootTest
 class MinioServiceTest {
+    @Autowired
+    private lateinit var service: MinioService
+
     @MockkBean
     private lateinit var minioClient: MinioClient
 
     @MockK
     private lateinit var putObjectResult: ObjectWriteResponse
-
-    @Autowired
-    private lateinit var service: MinioService
 
     @BeforeEach
     fun setUp() {

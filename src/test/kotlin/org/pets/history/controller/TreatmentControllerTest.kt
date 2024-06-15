@@ -1,8 +1,5 @@
 package org.pets.history.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,39 +9,25 @@ import org.pets.history.repository.PetRepository
 import org.pets.history.repository.TreatmentRepository
 import org.pets.history.serializer.TreatmentLogUpdateDTO
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.put
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.context.WebApplicationContext
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
-@AutoConfigureMockMvc
+
 class TreatmentControllerTest : IntegrationTest() {
-    private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-    private val mapper = ObjectMapper()
-    private lateinit var mockMvc: MockMvc
-    private lateinit var treatment: Treatment
-
-    @Autowired
-    private lateinit var context: WebApplicationContext
-
     @Autowired
     private lateinit var petRepository: PetRepository
 
     @Autowired
     private lateinit var treatmentRepository: TreatmentRepository
 
+    private lateinit var treatment: Treatment
+
     @BeforeEach
     fun setUp() {
-        mapper.registerModule(JavaTimeModule())
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
-
         treatment = anyTreatment()
         val pet = anyPet()
         pet.startTreatment(treatment)
@@ -60,7 +43,7 @@ class TreatmentControllerTest : IntegrationTest() {
     fun anyTreatment(): Treatment {
         return Treatment().apply {
             medicine = "Tramadol"
-            datetime = LocalDateTime.of(LocalDateTime.now().plusYears(1).year, 3, 1, 0, 0, 0)
+            datetime = OffsetDateTime.of(OffsetDateTime.now().plusYears(1).year, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC)
             dose = "1/4"
             frequency = 8
             numberOfTimes = 12

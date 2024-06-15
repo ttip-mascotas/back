@@ -10,8 +10,6 @@ RUN gradle build -x test --no-daemon --stacktrace
 
 FROM eclipse-temurin:21-jre-alpine
 
-RUN apk add --no-cache tzdata
-
 WORKDIR /app
 
 COPY --from=builder /artifact/build/libs/history*.jar history.jar

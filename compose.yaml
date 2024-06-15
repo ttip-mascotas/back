@@ -10,7 +10,6 @@ services:
       - MINIO_PASSWORD=${MINIO_PASSWORD}
       - MINIO_HOST=${MINIO_HOST}
       - MINIO_PUBLIC_BUCKET=${MINIO_PUBLIC_BUCKET}
-      - TZ=America/Buenos_Aires
     ports:
       - "${SPRING_SERVER_PORT}:${SPRING_SERVER_PORT}"
     depends_on:
@@ -58,7 +57,7 @@ services:
     volumes:
       - minio-data:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: [ "CMD", "mc", "ready", "local" ]
       interval: 5s
       timeout: 5s
       retries: 5

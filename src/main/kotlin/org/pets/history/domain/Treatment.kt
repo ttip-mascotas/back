@@ -7,7 +7,7 @@ import jakarta.validation.constraints.FutureOrPresent
 import jakarta.validation.constraints.NotEmpty
 import org.pets.history.serializer.View
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 
 @Entity
@@ -23,7 +23,7 @@ class Treatment {
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @FutureOrPresent(message = "Es necesario que introduzcas una fecha igual o siguiente a hoy")
-    var datetime: LocalDateTime = LocalDateTime.MIN
+    var datetime: OffsetDateTime = OffsetDateTime.MIN
 
     @Column(length = 128, nullable = false)
     @NotEmpty(message = "Es necesario que introduzcas la dosis indicada")

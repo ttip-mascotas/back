@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.PastOrPresent
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Entity
 class MedicalVisit {
@@ -19,7 +19,7 @@ class MedicalVisit {
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @PastOrPresent(message = "Es necesario que introduzcas una fecha igual o anterior a hoy")
-    var datetime: LocalDateTime = LocalDateTime.MIN
+    var datetime: OffsetDateTime = OffsetDateTime.MIN
 
     @Column(length = 128, nullable = false)
     @NotEmpty(message = "Es necesario que introduzcas el nombre del especialista")

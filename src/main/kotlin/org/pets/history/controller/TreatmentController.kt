@@ -78,11 +78,13 @@ class TreatmentController(
         treatmentService.updateTreatmentLog(treatmentId, treatmentLogId, treatmentLogUpdateDTO)
 
     @MessageMapping("/treatments/{treatmentId}/logs/{treatmentLogId}")
-    @SendTo("/topic/treatments/{treatmentId}/logs/{treatmentLogId}")
+    @SendTo("/topic/treatments/{treatmentId}")
     fun updateTreatmentLogWS(
         @DestinationVariable treatmentId: Long,
         @DestinationVariable treatmentLogId: Long,
         @Payload @Valid treatmentLogUpdateDTO: TreatmentLogUpdateDTO
-    ): TreatmentLog =
+    ): Treatment {
         treatmentService.updateTreatmentLog(treatmentId, treatmentLogId, treatmentLogUpdateDTO)
+        return treatmentService.getTreatment(treatmentId)
+    }
 }

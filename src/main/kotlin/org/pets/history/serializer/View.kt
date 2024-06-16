@@ -5,4 +5,6 @@ class View {
     interface ExtendedPet
     interface CompactTreatment
     interface ExtendedTreatment
+    interface CompactFamilyGroup
+    interface ExtendedFamilyGroup
 }

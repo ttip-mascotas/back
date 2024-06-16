@@ -5,7 +5,7 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import org.hibernate.annotations.CreationTimestamp
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Entity
 class Analysis {
@@ -31,5 +31,5 @@ class Analysis {
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreationTimestamp
-    var createdAt: LocalDateTime = LocalDateTime.now()
+    var createdAt: OffsetDateTime = OffsetDateTime.now()
 }

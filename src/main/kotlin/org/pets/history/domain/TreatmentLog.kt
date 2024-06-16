@@ -2,7 +2,7 @@ package org.pets.history.domain
 
 import jakarta.persistence.*
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Entity
 class TreatmentLog {
@@ -12,7 +12,7 @@ class TreatmentLog {
 
     @Column(nullable = false)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    var datetime: LocalDateTime = LocalDateTime.MIN
+    var datetime: OffsetDateTime = OffsetDateTime.MIN
 
     @Column(nullable = false)
     var administered: Boolean = false

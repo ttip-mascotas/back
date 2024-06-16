@@ -1,8 +1,5 @@
 package org.pets.history.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.ninjasquad.springmockk.MockkBean
 import io.minio.MinioClient
 import io.minio.ObjectWriteResponse
@@ -19,30 +16,23 @@ import org.pets.history.domain.Pet
 import org.pets.history.domain.Treatment
 import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.core.io.ResourceLoader
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.context.WebApplicationContext
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.*
 
-@AutoConfigureMockMvc
 class PetControllerTest : IntegrationTest() {
-    private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    private val mapper = ObjectMapper()
-    private lateinit var mockMvc: MockMvc
+    @Autowired
+    private lateinit var petRepository: PetRepository
 
     @Autowired
-    private lateinit var context: WebApplicationContext
+    private lateinit var resourceLoader: ResourceLoader
 
     @MockkBean
     private lateinit var minioClient: MinioClient
@@ -50,17 +40,8 @@ class PetControllerTest : IntegrationTest() {
     @MockK
     private lateinit var putObjectResult: ObjectWriteResponse
 
-    @Autowired
-    private lateinit var petRepository: PetRepository
-
-    @Autowired
-    private lateinit var resourceLoader: ResourceLoader
-
     @BeforeEach
     fun setUp() {
-        mapper.registerModule(JavaTimeModule())
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
         every { minioClient.bucketExists(any()) } returns false
         justRun { minioClient.makeBucket(any()) }
         every { minioClient.putObject(any()) } returns putObjectResult
@@ -85,7 +66,7 @@ class PetControllerTest : IntegrationTest() {
     fun anyMedicalVisit(): MedicalVisit {
         return MedicalVisit().apply {
             address = "Evergreen 123"
-            datetime = LocalDateTime.of(2024, 3, 28, 12, 0, 0)
+            datetime = OffsetDateTime.of(2024, 3, 28, 12, 0, 0, 0, ZoneOffset.UTC)
             specialist = "Lisa Simpson"
             observations = "Healthy"
         }
@@ -94,7 +75,7 @@ class PetControllerTest : IntegrationTest() {
     fun anyTreatment(): Treatment {
         return Treatment().apply {
             medicine = "Tramadol"
-            datetime = LocalDateTime.of(LocalDateTime.now().plusYears(1).year, 3, 1, 0, 0, 0)
+            datetime = OffsetDateTime.of(OffsetDateTime.now().plusYears(1).year, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC)
             dose = "1/4"
             frequency = 8
             numberOfTimes = 12
@@ -235,7 +216,8 @@ class PetControllerTest : IntegrationTest() {
     @Test
     fun `Given a pet id that exists, obtain all of its associated medical visits`() {
         var pet = anyPet()
-        pet.addMedicalVisit(anyMedicalVisit())
+        val medicalVisit = anyMedicalVisit()
+        pet.addMedicalVisit(medicalVisit)
         pet = petRepository.save(pet)
         val id = pet.id
 
@@ -247,10 +229,10 @@ class PetControllerTest : IntegrationTest() {
             content { contentType(MediaType.APPLICATION_JSON) }
             jsonPath("$.results.length()") { value(1) }
             jsonPath("$.results.[0].id") { isNumber() }
-            jsonPath("$.results.[0].address") { value("Evergreen 123") }
-            jsonPath("$.results.[0].datetime") { value("2024-03-28T12:00:00") }
-            jsonPath("$.results.[0].specialist") { value("Lisa Simpson") }
-            jsonPath("$.results.[0].observations") { value("Healthy") }
+            jsonPath("$.results.[0].address") { value(medicalVisit.address) }
+            jsonPath("$.results.[0].datetime") { value(medicalVisit.datetime.format(datetimeFormatter)) }
+            jsonPath("$.results.[0].specialist") { value(medicalVisit.specialist) }
+            jsonPath("$.results.[0].observations") { value(medicalVisit.observations) }
         }
     }
 

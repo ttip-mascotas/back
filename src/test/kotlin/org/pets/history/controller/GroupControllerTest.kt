@@ -1,6 +1,5 @@
 package org.pets.history.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.junit.jupiter.api.AfterEach
@@ -16,7 +15,6 @@ import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
@@ -24,8 +22,6 @@ import java.time.LocalDate
 
 @AutoConfigureMockMvc
 class GroupControllerTest : IntegrationTest() {
-    private val mapper = ObjectMapper()
-    private lateinit var mockMvc: MockMvc
     private lateinit var group: FamilyGroup
 
     @Autowired

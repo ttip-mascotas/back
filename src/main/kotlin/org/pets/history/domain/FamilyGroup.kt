@@ -1,4 +1,5 @@
 package org.pets.history.domain
+
 import com.fasterxml.jackson.annotation.JsonView
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
@@ -14,7 +15,6 @@ import org.pets.history.serializer.View
     )
 )
 class FamilyGroup {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null

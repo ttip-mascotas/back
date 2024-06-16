@@ -8,9 +8,8 @@ import org.springframework.stereotype.Service
 @Service
 @Transactional(Transactional.TxType.SUPPORTS)
 class FamilyGroupService(
-        private val familyGroupRepository: FamilyGroupRepository,
+    private val familyGroupRepository: FamilyGroupRepository,
 ) {
-
     fun getGroupsForUser(ownerId: Long): List<FamilyGroup> {
         return familyGroupRepository.findAllByMember(ownerId)
     }

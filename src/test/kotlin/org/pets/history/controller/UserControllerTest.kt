@@ -1,7 +1,5 @@
 package org.pets.history.controller
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -10,31 +8,20 @@ import org.pets.history.domain.Owner
 import org.pets.history.repository.FamilyGroupRepository
 import org.pets.history.repository.OwnerRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.context.WebApplicationContext
 
-@AutoConfigureMockMvc
-class UserControllerTest: IntegrationTest() {
-    private lateinit var user: Owner
-
-    @Autowired
-    private lateinit var context: WebApplicationContext
-
+class UserControllerTest : IntegrationTest() {
     @Autowired
     private lateinit var ownerRepository: OwnerRepository
 
     @Autowired
     private lateinit var familyGroupRepository: FamilyGroupRepository
 
+    private lateinit var user: Owner
+
     @BeforeEach
     fun setUp() {
-        mapper.registerModule(JavaTimeModule())
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
-
         val anUser = Owner().apply {
             name = "Ximena"
             email = "ximena@example.com"
@@ -42,16 +29,16 @@ class UserControllerTest: IntegrationTest() {
         }
 
         val groups = mutableSetOf(
-                FamilyGroup().apply {
-                    name = "Mis mascotas"
-                    members = mutableSetOf(anUser)
-                    pets = mutableSetOf()
-                },
-                FamilyGroup().apply {
-                    name = "Otro grupo"
-                    members = mutableSetOf(anUser)
-                    pets = mutableSetOf()
-                }
+            FamilyGroup().apply {
+                name = "Mis mascotas"
+                members = mutableSetOf(anUser)
+                pets = mutableSetOf()
+            },
+            FamilyGroup().apply {
+                name = "Otro grupo"
+                members = mutableSetOf(anUser)
+                pets = mutableSetOf()
+            }
         )
 
         user = ownerRepository.save(anUser)

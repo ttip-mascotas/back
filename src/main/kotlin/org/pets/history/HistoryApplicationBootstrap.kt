@@ -20,9 +20,6 @@ class HistoryApplicationBootstrap(
 ) :
     InitializingBean {
     override fun afterPropertiesSet() {
-        // TODO: use UTC
-        // println(">>>>> TIMEZONE: ${TimeZone.getDefault()}")
-
         if (petRepository.count() > 0) {
             return
         }

@@ -1,8 +1,12 @@
 package org.pets.history
 
+import org.pets.history.domain.FamilyGroup
 import org.pets.history.domain.Pet
 import org.pets.history.domain.PetSex
+import org.pets.history.domain.Owner
+import org.pets.history.repository.FamilyGroupRepository
 import org.pets.history.repository.PetRepository
+import org.pets.history.repository.OwnerRepository
 import org.pets.history.service.MinioService
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
@@ -14,9 +18,11 @@ import java.time.LocalDate
 @Service
 @Profile("!test")
 class HistoryApplicationBootstrap(
-    val resourceLoader: ResourceLoader,
-    val petRepository: PetRepository,
-    val minioService: MinioService,
+        val resourceLoader: ResourceLoader,
+        val petRepository: PetRepository,
+        val ownerRepository: OwnerRepository,
+        val familyGroupRepository: FamilyGroupRepository,
+        val minioService: MinioService,
 ) :
     InitializingBean {
     override fun afterPropertiesSet() {
@@ -24,7 +30,20 @@ class HistoryApplicationBootstrap(
             return
         }
 
-        val petSeeds = listOf(
+        val usersSeeds = mutableSetOf(
+                Owner().apply {
+                    name = "Ximena"
+                    email = "ximena@example.com"
+                    password = "passwordXimena1"
+                },
+                Owner().apply {
+                    name = "Pablo"
+                    email = "pablo@example.com"
+                    password = "passwordPablo1"
+                },
+        )
+
+        val petSeeds = mutableSetOf(
             Pet().apply {
                 name = "Jake"
                 photo = getAvatarURL(0)
@@ -71,6 +90,15 @@ class HistoryApplicationBootstrap(
                 sex = PetSex.FEMALE
             },
         )
+
+        val group = FamilyGroup().apply {
+            name = "Mis mascotas"
+            members = usersSeeds
+            pets = petSeeds
+        }
+
+        ownerRepository.saveAll(usersSeeds)
+        familyGroupRepository.save(group)
         petRepository.saveAll(petSeeds)
     }
 

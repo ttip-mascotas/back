@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.format.DateTimeFormatter
 
@@ -28,8 +27,12 @@ abstract class IntegrationTest {
     protected val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     companion object {
-        @Container
         @ServiceConnection
-        val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16.2-alpine3.19")
+        @JvmStatic
+        val postgresContainer: PostgreSQLContainer<*> = PostgreSQLContainer("postgres:16.2-alpine3.19")
+
+        init {
+            postgresContainer.start()
+        }
     }
 }

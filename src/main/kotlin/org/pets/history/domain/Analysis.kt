@@ -1,9 +1,11 @@
 package org.pets.history.domain
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonView
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import org.hibernate.annotations.CreationTimestamp
+import org.pets.history.serializer.View
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.OffsetDateTime
 
@@ -32,4 +34,14 @@ class Analysis {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreationTimestamp
     var createdAt: OffsetDateTime = OffsetDateTime.now()
+
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinColumn(name = "analysis_id")
+    @OrderBy(value = "created_at DESC")
+    @JsonView(View.ExtendedAnalysis::class)
+    var images: MutableSet<AnalysisImage> = mutableSetOf()
+
+    fun addImage(image: AnalysisImage) {
+        images.add(image)
+    }
 }

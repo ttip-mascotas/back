@@ -79,29 +79,6 @@ class PetController(
     fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
 
     @Operation(
-        summary = "Registers a pet",
-        description = "Registers a pet",
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "201",
-                description = "Success",
-                content = [
-                    Content(
-                        mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = Schema(implementation = Pet::class),
-                    )
-                ]
-            )
-        ]
-    )
-    @PostMapping("")
-    @ResponseStatus(HttpStatus.CREATED)
-    @JsonView(View.CompactPet::class)
-    fun registerPet(@RequestBody @Valid pet: Pet): Pet = petService.registerPet(pet)
-
-    @Operation(
         summary = "Retrieves medical visits",
         description = "Retrieves all medical visits for a given pet id",
     )

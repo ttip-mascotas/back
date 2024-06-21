@@ -31,11 +31,6 @@ class PetService(
         NotFoundException("No existe la mascota con identificador $id")
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
-    fun registerPet(pet: Pet): Pet {
-        return petRepository.save(pet)
-    }
-
     fun getMedicalVisits(petId: Long): Iterable<MedicalVisit> = getPet(petId).medicalVisits
 
     @Transactional(Transactional.TxType.REQUIRED)

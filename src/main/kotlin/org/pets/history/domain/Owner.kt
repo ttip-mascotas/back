@@ -1,11 +1,11 @@
 package org.pets.history.domain
+
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotEmpty
 
 @Entity
 class Owner {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null

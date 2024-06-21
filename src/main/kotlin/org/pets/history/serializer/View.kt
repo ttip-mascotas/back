@@ -7,4 +7,6 @@ class View {
     interface ExtendedTreatment
     interface CompactFamilyGroup
     interface ExtendedFamilyGroup
+    interface CompactAnalysis
+    interface ExtendedAnalysis
 }

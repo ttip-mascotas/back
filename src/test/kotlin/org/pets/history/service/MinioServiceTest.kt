@@ -40,6 +40,14 @@ class MinioServiceTest {
         every { minioClient.putObject(any()) } returns putObjectResult
     }
 
+    companion object {
+        @JvmStatic
+        fun avatarProvider(): List<Arguments> = listOf(
+            Arguments.of("public", "jpg", MediaType.IMAGE_JPEG_VALUE),
+            Arguments.of("public", "png", MediaType.IMAGE_PNG_VALUE),
+        )
+    }
+
     @ParameterizedTest
     @MethodSource("avatarProvider")
     fun `Uploads an avatar successfully`(bucket: String, fileExtension: String, mediaType: String) {
@@ -111,7 +119,7 @@ class MinioServiceTest {
     fun `Uploads a pet analysis successfully`() {
         val filename = UUID.randomUUID().toString()
         val petId = 1L
-        val bucket = "analysis"
+        val bucket = "analyses"
         val mediaType = MediaType.APPLICATION_PDF_VALUE
         val fileExtension = "pdf"
 
@@ -145,7 +153,7 @@ class MinioServiceTest {
     fun `Fails to upload a pet analysis`() {
         val filename = UUID.randomUUID().toString()
         val petId = 1L
-        val bucket = "analysis"
+        val bucket = "analyses"
         val mediaType = MediaType.APPLICATION_PROBLEM_XML_VALUE
         val fileExtension = "pdf"
 
@@ -179,11 +187,57 @@ class MinioServiceTest {
         confirmVerified(putObjectResult)
     }
 
-    companion object {
-        @JvmStatic
-        fun avatarProvider(): List<Arguments> = listOf(
-            Arguments.of("public", "jpg", MediaType.IMAGE_JPEG_VALUE),
-            Arguments.of("public", "png", MediaType.IMAGE_PNG_VALUE),
-        )
+    @Test
+    fun `Uploads a pet analysis image successfully`() {
+        val filename = UUID.randomUUID().toString()
+        val petId = 1L
+        val bucket = "analyses"
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns "$petId/images/$filename"
+
+        val inputStream = "fake_img".byteInputStream()
+
+        val analysisImageURL = service.uploadPetAnalysisImage(petId, inputStream, MediaType.IMAGE_PNG_VALUE)
+
+        assertEquals("http://127.0.0.1:9000/$bucket/$petId/images/$filename", analysisImageURL)
+
+        verify {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+    }
+
+    @Test
+    fun `Fails to upload a pet analysis image`() {
+        val filename = UUID.randomUUID().toString()
+        val petId = 1L
+        val bucket = "analyses"
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns "$petId/images/$filename"
+
+        val inputStream = "fake_img".byteInputStream()
+
+        assertThrows<MediaTypeNotValidException> {
+            service.uploadPetAnalysisImage(petId, inputStream, MediaType.APPLICATION_PDF_VALUE)
+        }
+
+        verify(exactly = 0) {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
     }
 }

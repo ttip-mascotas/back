@@ -14,6 +14,7 @@ import java.util.*
 class MinioService(private val minioClient: MinioClient, private val minioProperties: MinioProperties) {
     private val supportedAvatarContentTypes = setOf(MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE)
     private val supportedAnalysisContentTypes = setOf(MediaType.APPLICATION_PDF_VALUE)
+    private val supportedAnalysisImageContentTypes = setOf(MediaType.IMAGE_PNG_VALUE)
 
     fun uploadAvatar(stream: InputStream, contentType: String): String {
         if (!supportedAvatarContentTypes.contains(contentType)) {
@@ -29,6 +30,18 @@ class MinioService(private val minioClient: MinioClient, private val minioProper
         return uploadFileToBucket(
             minioProperties.analysesBucket,
             "$petId/${generateUniqueFilename()}",
+            stream,
+            contentType
+        )
+    }
+
+    fun uploadPetAnalysisImage(petId: Long, stream: InputStream, contentType: String): String {
+        if (!supportedAnalysisImageContentTypes.contains(contentType)) {
+            throw MediaTypeNotValidException(contentType, supportedAnalysisImageContentTypes)
+        }
+        return uploadFileToBucket(
+            minioProperties.analysesBucket,
+            "$petId/images/${generateUniqueFilename()}",
             stream,
             contentType
         )

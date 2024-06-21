@@ -47,9 +47,9 @@ class TreatmentController(
             )
         ]
     )
-    @GetMapping("/{id}")
+    @GetMapping("/{treatmentId}")
     @JsonView(View.ExtendedTreatment::class)
-    fun getTreatment(@PathVariable id: Long): Treatment = treatmentService.getTreatment(id)
+    fun getTreatment(@PathVariable treatmentId: Long): Treatment = treatmentService.getTreatment(treatmentId)
 
     @Operation(
         summary = "Update a treatment log",

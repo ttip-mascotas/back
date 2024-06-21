@@ -74,9 +74,9 @@ class PetController(
             )
         ]
     )
-    @GetMapping("/{id}")
+    @GetMapping("/{petId}")
     @JsonView(View.ExtendedPet::class)
-    fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
+    fun getPet(@PathVariable petId: Long): Pet = petService.getPet(petId)
 
     @Operation(
         summary = "Retrieves medical visits",
@@ -228,8 +228,8 @@ class PetController(
             )
         ]
     )
-    @GetMapping("/{id}/analyses")
+    @GetMapping("/{petId}/analyses")
     @JsonView(View.ExtendedPet::class)
-    fun searchAnalyses(@PathVariable id: Long, @RequestParam(name = "q") query: String): CollectionDTO<Analysis> =
-        CollectionDTO(petService.searchAnalyses(id, query))
+    fun searchAnalyses(@PathVariable petId: Long, @RequestParam(name = "q") query: String): CollectionDTO<Analysis> =
+        CollectionDTO(petService.searchAnalyses(petId, query))
 }

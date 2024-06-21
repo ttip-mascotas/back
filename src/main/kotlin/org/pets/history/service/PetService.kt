@@ -1,20 +1,17 @@
 package org.pets.history.service
 
 import jakarta.transaction.Transactional
-import org.apache.pdfbox.Loader
-import org.apache.pdfbox.io.RandomAccessReadBuffer
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.text.PDFTextStripper
-import org.pets.history.domain.Analysis
-import org.pets.history.domain.MedicalVisit
-import org.pets.history.domain.Pet
-import org.pets.history.domain.Treatment
+import org.pets.history.domain.*
 import org.pets.history.repository.AnalysisRepository
 import org.pets.history.repository.MedicalVisitRepository
 import org.pets.history.repository.PetRepository
 import org.pets.history.repository.TreatmentRepository
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
 
 @Service
 @Transactional(Transactional.TxType.SUPPORTS)
@@ -24,6 +21,7 @@ class PetService(
     private val treatmentRepository: TreatmentRepository,
     private val analysisRepository: AnalysisRepository,
     private val minioService: MinioService,
+    private val pdfParser: PDFParser,
 ) {
     fun getAllPets(): MutableIterable<Pet> = petRepository.findAll()
 
@@ -52,23 +50,40 @@ class PetService(
     @Transactional(Transactional.TxType.REQUIRED)
     fun attachAnalysis(petId: Long, analysisFile: MultipartFile): Analysis {
         val foundPet = getPet(petId)
+
+        val extractedText = pdfParser.extractText(analysisFile)
+        val extractedImages = pdfParser.extractImages(analysisFile)
+
         val analysisURL = minioService.uploadPetAnalysis(petId, analysisFile.inputStream, analysisFile.contentType!!)
+
+        val analysisImages = extractedImages.map {
+            val imageStream = ByteArrayOutputStream().use { outputStream ->
+                ImageIO.write(it, "png", outputStream)
+                ByteArrayInputStream(outputStream.toByteArray())
+            }
+
+            val imageURL = minioService.uploadPetAnalysisImage(petId, imageStream, MediaType.IMAGE_PNG_VALUE)
+            AnalysisImage().apply {
+                url = imageURL
+            }
+        }
+
         val defaultFilename = "análisis.pdf"
+
         val analysis = Analysis().apply {
             name = analysisFile.originalFilename?.ifBlank { defaultFilename } ?: defaultFilename
             size = analysisFile.size
             url = analysisURL
-            text = readText(analysisFile)
+            text = extractedText
         }
+
+        analysisImages.forEach {
+            analysis.addImage(it)
+        }
+
         foundPet.attachAnalysis(analysis)
         analysisRepository.save(analysis)
         return analysis
-    }
-
-    fun readText(pdfFile: MultipartFile): String {
-        val document: PDDocument = Loader.loadPDF(RandomAccessReadBuffer(pdfFile.inputStream))
-        val pdfStripper = PDFTextStripper()
-        return pdfStripper.getText(document)
     }
 
     fun searchAnalyses(petId: Long, query: String): Iterable<Analysis> = analysisRepository.search(petId, query)

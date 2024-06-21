@@ -13,6 +13,7 @@ import org.pets.history.repository.PetRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import java.time.LocalDate
 
 class GroupControllerTest : IntegrationTest() {
@@ -81,6 +82,17 @@ class GroupControllerTest : IntegrationTest() {
         ownerRepository.deleteAll()
     }
 
+    fun anyPet(): Pet {
+        return Pet().apply {
+            name = "Pippin"
+            photo = "https://a.fake.img.png"
+            weight = 2.0
+            birthdate = LocalDate.of(2023, 1, 1)
+            breed = "San Bernardo"
+            fur = "Long"
+        }
+    }
+
     @Test
     fun `Given a group id that exists, the group's information is found and returned`() {
         val id = group.id
@@ -107,6 +119,43 @@ class GroupControllerTest : IntegrationTest() {
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `Given the details of a pet, registers said pet and return it`() {
+        val pet = anyPet()
+
+        mockMvc.post("/groups/${group.id}/pets") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(pet)
+        }.andExpect {
+            status { isCreated() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.id") { isNumber() }
+            jsonPath("$.name") { value(pet.name) }
+            jsonPath("$.photo") { value(pet.photo) }
+            jsonPath("$.weight") { value(pet.weight) }
+            jsonPath("$.birthdate") { value(pet.birthdate.format(dateFormatter)) }
+            jsonPath("$.breed") { value(pet.breed) }
+            jsonPath("$.fur") { value(pet.fur) }
+            jsonPath("$.sex") { value(pet.sex.toString()) }
+            jsonPath("$.age") { value(pet.age) }
+        }
+    }
+
+    @Test
+    fun `Given the details of a pet, when said details contain a negative weight, fail to register the pet and return an error`() {
+        val pet = anyPet()
+        pet.weight = -1.0
+
+        mockMvc.post("/groups/${group.id}/pets") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(pet)
+        }.andExpect {
+            status { isBadRequest() }
         }
     }
 }

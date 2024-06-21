@@ -31,4 +31,8 @@ class FamilyGroup {
     @JoinColumn(name = "family_group_id")
     @JsonView(View.ExtendedFamilyGroup::class)
     var pets: MutableSet<Pet> = mutableSetOf()
+
+    fun addPet(pet: Pet) {
+        pets.add(pet)
+    }
 }

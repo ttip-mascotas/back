@@ -37,7 +37,9 @@ dependencies {
     runtimeOnly("org.flywaydb:flyway-database-postgresql:10.12.0")
 
     implementation("io.minio:minio:8.5.9")
-    implementation("org.apache.pdfbox:pdfbox:3.0.1")
+    implementation("org.apache.pdfbox:pdfbox:3.0.1") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(module = "mockito-core")

@@ -10,5 +10,5 @@ interface TreatmentRepository : CrudRepository<Treatment, Long> {
         attributePaths = ["logs"],
         type = EntityGraph.EntityGraphType.FETCH,
     )
-    fun findWithAllRelatedById(petId: Long): Optional<Treatment>
+    fun findWithAllRelatedById(treatmentId: Long): Optional<Treatment>
 }

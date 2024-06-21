@@ -213,4 +213,31 @@ class MinioServiceTest {
         confirmVerified(minioClient)
         confirmVerified(putObjectResult)
     }
+
+    @Test
+    fun `Fails to upload a pet analysis image`() {
+        val filename = UUID.randomUUID().toString()
+        val petId = 1L
+        val bucket = "analyses"
+
+        every { putObjectResult.bucket() } returns bucket
+        every { putObjectResult.`object`() } returns "$petId/images/$filename"
+
+        val inputStream = "fake_img".byteInputStream()
+
+        assertThrows<MediaTypeNotValidException> {
+            service.uploadPetAnalysisImage(petId, inputStream, MediaType.APPLICATION_PDF_VALUE)
+        }
+
+        verify(exactly = 0) {
+            minioClient.bucketExists(any())
+            minioClient.makeBucket(any())
+            minioClient.putObject(any())
+            putObjectResult.bucket()
+            putObjectResult.`object`()
+        }
+
+        confirmVerified(minioClient)
+        confirmVerified(putObjectResult)
+    }
 }

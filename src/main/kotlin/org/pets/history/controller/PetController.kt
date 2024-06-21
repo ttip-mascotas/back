@@ -74,9 +74,9 @@ class PetController(
             )
         ]
     )
-    @GetMapping("/{id}")
+    @GetMapping("/{petId}")
     @JsonView(View.ExtendedPet::class)
-    fun getPet(@PathVariable id: Long): Pet = petService.getPet(id)
+    fun getPet(@PathVariable petId: Long): Pet = petService.getPet(petId)
 
     @Operation(
         summary = "Registers a pet",

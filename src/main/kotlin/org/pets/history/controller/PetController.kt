@@ -251,8 +251,8 @@ class PetController(
             )
         ]
     )
-    @GetMapping("/{id}/analyses")
+    @GetMapping("/{petId}/analyses")
     @JsonView(View.ExtendedPet::class)
-    fun searchAnalyses(@PathVariable id: Long, @RequestParam(name = "q") query: String): CollectionDTO<Analysis> =
-        CollectionDTO(petService.searchAnalyses(id, query))
+    fun searchAnalyses(@PathVariable petId: Long, @RequestParam(name = "q") query: String): CollectionDTO<Analysis> =
+        CollectionDTO(petService.searchAnalyses(petId, query))
 }

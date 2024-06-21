@@ -92,9 +92,4 @@ class PetService(
     }
 
     fun searchAnalyses(petId: Long, query: String): Iterable<Analysis> = analysisRepository.search(petId, query)
-
-    fun getAnalysis(petId: Long, analysisId: Long): Analysis =
-        analysisRepository.findWithAllRelatedById(analysisId).orElseThrow {
-            NotFoundException("No existe el análisis con identificador $analysisId")
-        }
 }

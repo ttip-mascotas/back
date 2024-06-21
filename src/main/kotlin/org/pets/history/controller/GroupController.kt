@@ -7,9 +7,12 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.pets.history.domain.FamilyGroup
+import org.pets.history.domain.Pet
 import org.pets.history.serializer.View
 import org.pets.history.service.FamilyGroupService
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -44,4 +47,30 @@ class GroupController(
     @GetMapping("/{id}")
     @JsonView(View.ExtendedFamilyGroup::class)
     fun getFamilyGroup(@PathVariable id: Long): FamilyGroup = familyGroupService.getGroupById(id)
+
+    @Operation(
+            summary = "Registers a pet",
+            description = "Registers a pet",
+    )
+    @ApiResponses(
+            value = [
+                ApiResponse(
+                        responseCode = "201",
+                        description = "Success",
+                        content = [
+                            Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = Schema(implementation = Pet::class),
+                            )
+                        ]
+                )
+            ]
+    )
+    @PostMapping("/{id}/pets")
+    @ResponseStatus(HttpStatus.CREATED)
+    @JsonView(View.CompactPet::class)
+    fun registerPet(
+            @PathVariable id: Long,
+            @RequestBody @Valid pet: Pet
+    ): Pet = familyGroupService.registerPet(id, pet)
 }

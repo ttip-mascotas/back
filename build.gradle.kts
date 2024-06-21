@@ -32,8 +32,8 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.flywaydb:flyway-core:10.12.0")
-    runtimeOnly("org.flywaydb:flyway-database-postgresql:10.12.0")
+    implementation("org.flywaydb:flyway-core")
+    runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
     implementation("io.minio:minio:8.5.9")
     implementation("org.apache.pdfbox:pdfbox:3.0.1") {

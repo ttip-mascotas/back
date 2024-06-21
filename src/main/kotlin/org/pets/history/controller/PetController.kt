@@ -255,4 +255,27 @@ class PetController(
     @JsonView(View.ExtendedPet::class)
     fun searchAnalyses(@PathVariable petId: Long, @RequestParam(name = "q") query: String): CollectionDTO<Analysis> =
         CollectionDTO(petService.searchAnalyses(petId, query))
+
+    @Operation(
+        summary = "Get pet analysis",
+        description = "Gets a pet analysis",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Success",
+                content = [
+                    Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = Schema(implementation = Analysis::class),
+                    )
+                ]
+            )
+        ]
+    )
+    @GetMapping("/{petId}/analyses/{analysisId}")
+    @JsonView(View.ExtendedAnalysis::class)
+    fun getAnalysis(@PathVariable petId: Long, @PathVariable analysisId: Long): Analysis =
+        petService.getAnalysis(petId, analysisId)
 }

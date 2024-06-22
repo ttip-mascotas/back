@@ -40,10 +40,10 @@ class JwtAuthenticationFilter(
         if (SecurityContextHolder.getContext().authentication == null) {
             val userDetails = userDetailsService.loadUserByUsername(userEmail)
 
-            if (jwtService.isTokenValid(token, userDetails)) {
+            if (!jwtService.isTokenValid(token, userDetails)) {
                 throw AuthenticationCredentialsNotFoundException("El token expiró o es inválido")
             }
-            
+
             val authToken = UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,

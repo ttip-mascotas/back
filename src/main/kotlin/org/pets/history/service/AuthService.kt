@@ -23,6 +23,7 @@ class AuthService(
             NotFoundException("No existe el usuario $username")
         }
         val claims = mapOf(
+            "id" to user.id.toString(),
             "name" to user.name,
             "email" to user.email,
         )

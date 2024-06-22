@@ -44,7 +44,7 @@ class JwtService {
         return Jwts
             .builder()
             .claims(extraClaims)
-            .subject(owner.id.toString())
+            .subject(owner.email)
             .issuedAt(Date(System.currentTimeMillis()))
             .expiration(Date(System.currentTimeMillis() + expiration))
             .signWith(signInKey, Jwts.SIG.HS512)

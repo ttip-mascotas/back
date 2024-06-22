@@ -26,3 +26,7 @@ minio:
   public_bucket: public
   analyses_bucket: analyses
   put_object_part_size: 10485760
+
+jwt:
+  secret-key: 88sgXN7j/tp032VsRyr9ix2PBJgAJRySPLHCPIcFFxLzlJ2KT1ODWdqU5E7jNBSNoQ/bwBR6Db8vCbGCDPC75Q== # dev only
+  expiration: 86400000 # 1 day

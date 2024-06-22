@@ -27,9 +27,12 @@ class SecurityConfiguration(
     fun filterChain(http: HttpSecurity, jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint): SecurityFilterChain {
         http {
             authorizeRequests {
-                authorize("/api/v1/auth/**", permitAll)
-                authorize("/api/v1/swagger/**", permitAll)
+                authorize("/swagger-ui/**", permitAll)
+                authorize("/v3/api-docs/**", permitAll)
                 authorize("/login", permitAll)
+                authorize("/notifications", permitAll)
+                authorize("/app", permitAll)
+                authorize("/topic", permitAll)
                 authorize(anyRequest, authenticated)
             }
             csrf { disable() }

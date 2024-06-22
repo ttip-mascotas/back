@@ -50,4 +50,5 @@ POSTGRES_DB=pets_history
 
 ### Endpoints
 
-La especificación de los endpoints se puede acceder a través de Swagger-UI (OpenAPI v3 Spec), ingresando a <http://127.0.0.1:8080> con la aplicación en ejecución.
+La especificación de los endpoints se puede acceder a través de Swagger-UI (OpenAPI v3 Spec), ingresando
+a <http://127.0.0.1:8080/swagger-ui/index.html> con la aplicación en ejecución.

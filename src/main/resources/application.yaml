@@ -56,7 +56,6 @@ springdoc:
     display-request-duration: true
     groups-order: DESC
     operationsSorter: alpha
-    use-root-path: true
   cache:
     disabled: true
 

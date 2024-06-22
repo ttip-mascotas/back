@@ -15,5 +15,4 @@ class JwtAuthenticationEntryPoint : AuthenticationEntryPoint {
     ) {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.message)
     }
-
 }

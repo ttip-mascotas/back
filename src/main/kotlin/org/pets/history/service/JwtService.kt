@@ -4,8 +4,8 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
+import org.pets.history.domain.Owner
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
@@ -29,26 +29,22 @@ class JwtService {
         return claimsResolver(claims)
     }
 
-    fun generateToken(authentication: Authentication): String {
-        return generateToken(HashMap(), authentication)
-    }
-
     fun generateToken(
-        extraClaims: Map<String, Any?>,
-        authentication: Authentication
+        extraClaims: Map<String, Any>,
+        owner: Owner
     ): String {
-        return buildToken(extraClaims, authentication, jwtExpiration)
+        return buildToken(extraClaims, owner, jwtExpiration)
     }
 
     private fun buildToken(
-        extraClaims: Map<String, Any?>,
-        authentication: Authentication,
+        extraClaims: Map<String, Any>,
+        owner: Owner,
         expiration: Long
     ): String {
         return Jwts
             .builder()
             .claims(extraClaims)
-            .subject(authentication.name)
+            .subject(owner.id.toString())
             .issuedAt(Date(System.currentTimeMillis()))
             .expiration(Date(System.currentTimeMillis() + expiration))
             .signWith(signInKey, Jwts.SIG.HS512)

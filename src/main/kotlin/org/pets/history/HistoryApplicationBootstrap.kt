@@ -1,28 +1,30 @@
 package org.pets.history
 
 import org.pets.history.domain.FamilyGroup
+import org.pets.history.domain.Owner
 import org.pets.history.domain.Pet
 import org.pets.history.domain.PetSex
-import org.pets.history.domain.Owner
 import org.pets.history.repository.FamilyGroupRepository
-import org.pets.history.repository.PetRepository
 import org.pets.history.repository.OwnerRepository
+import org.pets.history.repository.PetRepository
 import org.pets.history.service.MinioService
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.ResourceLoader
 import org.springframework.http.MediaType
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
 @Profile("!test")
 class HistoryApplicationBootstrap(
-        val resourceLoader: ResourceLoader,
-        val petRepository: PetRepository,
-        val ownerRepository: OwnerRepository,
-        val familyGroupRepository: FamilyGroupRepository,
-        val minioService: MinioService,
+    val resourceLoader: ResourceLoader,
+    val petRepository: PetRepository,
+    val ownerRepository: OwnerRepository,
+    val familyGroupRepository: FamilyGroupRepository,
+    val minioService: MinioService,
+    val passwordEncoder: PasswordEncoder
 ) :
     InitializingBean {
     override fun afterPropertiesSet() {
@@ -31,16 +33,16 @@ class HistoryApplicationBootstrap(
         }
 
         val usersSeeds = mutableSetOf(
-                Owner().apply {
-                    name = "Ximena"
-                    email = "ximena@example.com"
-                    password = "passwordXimena1"
-                },
-                Owner().apply {
-                    name = "Pablo"
-                    email = "pablo@example.com"
-                    password = "passwordPablo1"
-                },
+            Owner().apply {
+                name = "Ximena"
+                email = "ximena@example.com"
+                password = passwordEncoder.encode("passwordXimena1")
+            },
+            Owner().apply {
+                name = "Pablo"
+                email = "pablo@example.com"
+                password = passwordEncoder.encode("passwordPablo1")
+            },
         )
 
         val petSeeds = mutableSetOf(

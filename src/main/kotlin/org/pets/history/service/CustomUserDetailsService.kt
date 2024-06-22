@@ -16,6 +16,6 @@ class CustomUserDetailsService(
         val user = ownerRepository.findByEmail(email).orElseThrow {
             UsernameNotFoundException("No se encontró el usuario")
         }
-        return User(user.name, user.password, listOf())
+        return User(user.email, user.password, listOf())
     }
 }
